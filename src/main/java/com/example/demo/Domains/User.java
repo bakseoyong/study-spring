@@ -16,10 +16,10 @@ import java.util.UUID;
 public class User {
 
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name= "uuid2", strategy = "uuid2")
-    @Type(type = "uuid-char")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @GeneratedValue(generator = "uuid2")
+//    @GenericGenerator(name= "uuid2", strategy = "uuid2")
+//    @Type(type = "uuid-char")
     private UUID uuid;
 
     @Column(nullable = false)
