@@ -2,6 +2,7 @@ package com.example.demo.Domains;
 
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,4 +22,8 @@ public class Consumer extends User{
     @OneToMany(mappedBy = "consumers")
     private List<ConsumerCoupon> consumerCoupons =  new ArrayList<>();
 
+    @Builder
+    Consumer(String id, String password, String email){
+        super(id, password, email);
+    }
 }

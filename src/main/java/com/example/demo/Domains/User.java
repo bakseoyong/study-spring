@@ -20,7 +20,7 @@ public class User {
 //    @GeneratedValue(generator = "uuid2")
 //    @GenericGenerator(name= "uuid2", strategy = "uuid2")
 //    @Type(type = "uuid-char")
-    private UUID uuid;
+    private Long uuid;
 
     @Column(nullable = false)
     private String id;

@@ -1,9 +1,9 @@
 package com.example.demo;
 
-import com.example.demo.Domains.Advertiser;
-import com.example.demo.Domains.Department;
-import com.example.demo.Domains.Manager;
-import com.example.demo.Domains.Student;
+import com.example.demo.Domains.*;
+import com.example.demo.Dtos.DiscountConditionDto;
+import com.example.demo.Repositories.ConsumerCouponRepository;
+import com.example.demo.Repositories.CouponRepository;
 import com.example.demo.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.persistence.EntityManager;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -19,47 +21,61 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class CouponTest {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    CouponRepository couponRepository;
+
+    @Autowired
+    ConsumerCouponRepository consumerCouponRepository;
 
     @Autowired
     EntityManager entityManager;
 
     @BeforeEach
     public void setUp() throws Exception{
-        Student student = Student.builder()
-                .id("studentTest")
-                .password("qwer1234")
-                .email("test@test.com")
-                .department(Department.컴퓨터공학과)
-                .build();
-
-        Manager manager = Manager.builder()
-                .id("managerTest")
+        Consumer consumer = Consumer.builder()
+                .id("consumerTest")
                 .password("qwer1234")
                 .email("test@test.com")
                 .build();
 
-        Advertiser advertiser = Advertiser.builder()
-                .id("advertiserTest")
-                .password("qwer1234")
-                .email("test@test.com")
-                .company("네이버")
+        userRepository.save(consumer);
+
+        Coupon coupon = Coupon.builder()
+                .name("미리예약4%_8월")
+                .couponType(CouponType.국내숙소)
+                .discountType(DiscountType.PERCENT)
+                .discountAmount(4L)
+                .maximumDiscount(10000L)
+                .discountConditionDto(DiscountConditionDto.builder()
+                        .atWeekend(true)
+                        .build())
                 .build();
 
-        userRepository.save(student);
-        userRepository.save(manager);
-        userRepository.save(advertiser);
+        couponRepository.save(coupon);
+
+        ConsumerCoupon consumerCoupon = ConsumerCoupon.builder()
+                .consumer(consumer)
+                .coupon(coupon)
+                .build();
+
+        consumerCouponRepository.save(consumerCoupon);
 
         entityManager.clear();
+
     }
 
     @Test
-    public void User_서브클래스_casting_가져오기(){
-        Student student = (Student) userRepository.findAll().get(0);
-        Manager manager = (Manager) userRepository.findAll().get(1);
-        Advertiser advertiser = (Advertiser) userRepository.findAll().get(2);
+    public void Comunser_생성_확인(){
+        Consumer consumer = (Consumer) userRepository.findAll().get(0);
 
-        assertThat(student.getId(), is("studentTest"));
-        assertThat(manager.getId(), is("managerTest"));
-        assertThat(advertiser.getId(), is("advertiserTest"));
+        assertThat(consumer.getId(), is("consumerTest"));
+    }
+
+    @Test
+    public void Consumer_Coupon_리스트보기(){
+        Consumer consumer = (Consumer) userRepository.findAll().get(0);
+
+        List<Coupon> coupons = consumerCouponRepository.findByConsumer
+        assertThat(consumerCouponRepository.findByConsumer(consumer).get(0));
     }
 }

@@ -1,5 +1,7 @@
 package com.example.demo.Domains;
 
+import lombok.Builder;
+
 import javax.persistence.*;
 
 @Entity
@@ -16,4 +18,10 @@ public class ConsumerCoupon {
     @ManyToOne
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
+
+    @Builder
+    ConsumerCoupon(Consumer consumer, Coupon coupon){
+        this.consumer = consumer;
+        this.coupon = coupon;
+    }
 }

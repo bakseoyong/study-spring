@@ -1,7 +1,9 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Dtos.CouponCreateResponseDto;
 import com.example.demo.Dtos.UserSignupRequestDto;
 import com.example.demo.Dtos.UserSignupResponseDto;
+import com.example.demo.Services.CouponService;
 import com.example.demo.Services.UserService;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,13 +19,13 @@ import javax.validation.Valid;
 public class CouponController {
     private CouponService couponService;
 
-//    @PostMapping("/coupon/create")
-//    public ResponseEntity create(@Valid @RequestBody CouponCreateReqeustDto couponCreateReqeustDto){
-//        CouponCreateResponseDto couponCreateResponseDto = couponService.create(couponCreateReqeustDto);
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Study", "Coupon");
-//        return ResponseEntity.ok()
-//                .headers(headers)
-//                .body(userSignupResponseDto);
-//    }
+    @PostMapping("/coupon/create")
+    public ResponseEntity create(@Valid @RequestBody CouponCreateReqeustDto couponCreateReqeustDto){
+        CouponCreateResponseDto couponCreateResponseDto = couponService.create(couponCreateReqeustDto);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Study", "Coupon");
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(userSignupResponseDto);
+    }
 }
