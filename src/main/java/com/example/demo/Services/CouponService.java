@@ -15,8 +15,8 @@ public class CouponService {
 
     private CouponRepository couponRepository;
 
-//    public CouponCreateResponseDto create(CouponCreateRequestDto couponCreateRequestDto){
-//        Coupon coupon = couponCreateRequestDto.toEntity();
-//        return new UserSignupResponseDto(this.couponRepository.save(coupon));
-//    }
+    public CouponCreateResponseDto create(CouponCreateRequestDto couponCreateRequestDto){
+        Coupon coupon = couponCreateRequestDto.toEntity();
+        return new CouponCreateResponseDto(this.couponRepository.save(coupon));
+    }
 }

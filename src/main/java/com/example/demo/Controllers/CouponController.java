@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.Dtos.CouponCreateRequestDto;
 import com.example.demo.Dtos.CouponCreateResponseDto;
 import com.example.demo.Dtos.UserSignupRequestDto;
 import com.example.demo.Dtos.UserSignupResponseDto;
@@ -20,12 +21,12 @@ public class CouponController {
     private CouponService couponService;
 
     @PostMapping("/coupon/create")
-    public ResponseEntity create(@Valid @RequestBody CouponCreateReqeustDto couponCreateReqeustDto){
+    public ResponseEntity create(@Valid @RequestBody CouponCreateRequestDto couponCreateReqeustDto){
         CouponCreateResponseDto couponCreateResponseDto = couponService.create(couponCreateReqeustDto);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Study", "Coupon");
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(userSignupResponseDto);
+                .body(couponCreateResponseDto);
     }
 }

@@ -9,10 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,15 +23,13 @@ public class CouponTest {
     UserRepository userRepository;
     @Autowired
     CouponRepository couponRepository;
-
     @Autowired
     ConsumerCouponRepository consumerCouponRepository;
-
     @Autowired
     EntityManager entityManager;
 
     @BeforeEach
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         Consumer consumer = Consumer.builder()
                 .id("consumerTest")
                 .password("qwer1234")
@@ -61,21 +59,20 @@ public class CouponTest {
         consumerCouponRepository.save(consumerCoupon);
 
         entityManager.clear();
-
     }
 
     @Test
-    public void Comunser_생성_확인(){
+    public void Comunser_생성_확인() {
         Consumer consumer = (Consumer) userRepository.findAll().get(0);
 
         assertThat(consumer.getId(), is("consumerTest"));
     }
 
     @Test
-    public void Consumer_Coupon_리스트보기(){
+    @Transactional
+    public void Consumer_Coupon_리스트보기() {
         Consumer consumer = (Consumer) userRepository.findAll().get(0);
 
-        List<Coupon> coupons = consumerCouponRepository.findByConsumer
-        assertThat(consumerCouponRepository.findByConsumer(consumer).get(0));
+        assertThat(consumer.getConsumerCoupons().get(0).getId(), is(1L));
     }
 }

@@ -1,8 +1,10 @@
 package com.example.demo.Domains;
 
 import com.example.demo.Dtos.DiscountConditionDto;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -12,13 +14,14 @@ import java.util.List;
 @Entity
 @Table(name = "coupons")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coupon {
     @Id
     @Column(nullable = false, name = "coupon_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "coupons")
+    @OneToMany(mappedBy = "coupon")
     private List<ConsumerCoupon> consumerCoupons =  new ArrayList<>();
 
     @Column(nullable = false)
@@ -62,7 +65,7 @@ public class Coupon {
     //
 
     @Builder
-    Coupon(String name, CouponType couponType, DiscountType discountType, Long discountAmount, Long maximumDiscount,
+    public Coupon(String name, CouponType couponType, DiscountType discountType, Long discountAmount, Long maximumDiscount,
            DiscountConditionDto discountConditionDto){
         this.name = name;
         this.couponType = couponType;
