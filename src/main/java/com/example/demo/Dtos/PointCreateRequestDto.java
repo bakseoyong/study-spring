@@ -25,11 +25,9 @@ public class PointCreateRequestDto {
     @NotBlank(message = "포인트 적립/사용/소멸 대상자를 입력해 주세요.")
     private Consumer consumer;
 
-    @NotBlank(message = "발급 날짜를 입력해 주세요.")
     @Temporal(TemporalType.DATE)
     private Date createdAt;
 
-    @NotBlank(message = "만료 날짜를 입력해 주세요.")
     @Temporal(TemporalType.DATE)
     private Date expiredAt;
 

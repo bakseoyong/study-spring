@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -30,6 +31,8 @@ public class Point {
     private Date createdAt;
     @Temporal(TemporalType.DATE)
     private Date expiredAt;
+//    @Column(nullable = true)
+//    private boolean useOrExpired;
 
     @Builder
     public Point(Consumer consumer, PointStatus pointStatus, String name, Long amount,

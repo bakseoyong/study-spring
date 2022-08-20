@@ -1,7 +1,7 @@
 package com.example.demo.Domains;
 
 public enum PointStatus {
-    적립("accumulate"),
+    적립("collect"),
     사용("use"),
     소멸("expired");
     private String value;

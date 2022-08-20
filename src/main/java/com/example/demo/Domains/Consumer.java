@@ -20,12 +20,17 @@ public class Consumer extends User{
     @OneToMany(mappedBy = "consumer")
     private List<Point> points = new ArrayList<>();
 
+    @OneToMany(mappedBy = "consumer")
+    private List<PointDetail> pointDetails = new ArrayList<>();
+
     private Long availablePointAmount;
 
     private Long after15DayExpiredPointAmount;
 
     @OneToMany(mappedBy = "consumer")
     private List<ConsumerCoupon> consumerCoupons = new ArrayList<>();
+
+
 
     public void setAvailablePointAmount(Long amount){
         if (availablePointAmount + amount < 0) {
