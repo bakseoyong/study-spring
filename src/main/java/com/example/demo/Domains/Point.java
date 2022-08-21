@@ -31,6 +31,7 @@ public class Point {
     private Date createdAt;
     @Temporal(TemporalType.DATE)
     private Date expiredAt;
+
 //    @Column(nullable = true)
 //    private boolean useOrExpired;
 

@@ -8,6 +8,7 @@ import com.example.demo.Dtos.PointCreateRequestDto;
 import com.example.demo.Dtos.PointCreateResponseDto;
 import com.example.demo.Repositories.PointDetailRepository;
 import com.example.demo.Repositories.PointRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +17,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 @Service
+@RequiredArgsConstructor
 public class PointService {
-    private PointRepository pointRepository;
-    private PointDetailRepository pointDetailRepository;
+    private final PointRepository pointRepository;
+    private final PointDetailRepository pointDetailRepository;
 
     @Transactional
     public PointCreateResponseDto create(PointCreateRequestDto pointCreateRequestDto){
@@ -27,7 +29,9 @@ public class PointService {
         consumer.setAvailablePointAmount(point.getAmount());
         Date expiredAt = point.getExpiredAt();
 
-        if(TimeUnit.DAYS.convert(new Date().getTime() - expiredAt.getTime(), TimeUnit.MICROSECONDS) <= 15){
+        if(expiredAt == null ||
+                TimeUnit.DAYS.convert(new Date().getTime() - expiredAt.getTime(), TimeUnit.MICROSECONDS) <= 15
+        ){
             consumer.setAfter15DayExpiredPointAmount(point.getAmount());
         }
 
@@ -37,15 +41,14 @@ public class PointService {
             PointDetail pointDetail = PointDetail.builder()
                     .pointStatus(point.getPointStatus())
                     .amount(point.getAmount())
+                    .expiredAt(point.getExpiredAt())
                     .build();
 
             this.pointDetailRepository.save(pointDetail);
         }
         else if(point.getPointStatus() == PointStatus.사용){
-            //select * from pointdetail where consumer_id = ? by expired;
-
-            //지금 조건은 만료된 포인트까지 불러온다. 만료된 포인트는 안불러오게 설정해야 한다.
-            List<PointDetail> pointDetails = pointDetailRepository.findAllByConsumerOrderByExpiredAt(consumer);
+            List<PointDetail> pointDetails =
+                    pointDetailRepository.findByConsumerGroupByCollectedIdHavingMoreThan0OrderByExpiredAt(consumer);
             Long amount = point.getAmount();
             List<PointDetail> insertPointDetails = new ArrayList<>();
 
@@ -60,17 +63,19 @@ public class PointService {
                                     .amount(pd.getAmount())
                                     .collectId(pd.getId())
                                     .pointId(assignedPoint.getId())
+                                    .expiredAt(pd.getExpiredAt())
                                     .build());
                 }else{
                     pd.setCollectId();
                     insertPointDetails.add(pd);
 
                     insertPointDetails.add(PointDetail.builder()
-                            .pointStatus(PointStatus.사용)
-                            .amount(amount)
-                            .collectId(pd.getId())
-                            .pointId(assignedPoint.getId())
-                            .build());
+                                    .pointStatus(PointStatus.사용)
+                                    .amount(amount)
+                                    .collectId(pd.getId())
+                                    .pointId(assignedPoint.getId())
+                                    .expiredAt(pd.getExpiredAt())
+                                    .build());
 
                     this.pointDetailRepository.saveAll(insertPointDetails);
                     break;

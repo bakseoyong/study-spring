@@ -2,8 +2,6 @@ package com.example.demo;
 
 import com.example.demo.Domains.*;
 import com.example.demo.Dtos.PointCreateRequestDto;
-import com.example.demo.Dtos.PointCreateResponseDto;
-import com.example.demo.Repositories.PointRepository;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Services.PointService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +18,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @SpringBootTest
 public class PointTest {
     @Autowired
-    PointService pointService;
+    private PointService pointService;
     @Autowired
-    PointRepository pointRepository;
+    private UserRepository userRepository;
     @Autowired
-    UserRepository userRepository;
-    @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -84,17 +80,17 @@ public class PointTest {
                     .name("테스트쿠폰")
                     .pointStatus(PointStatus.적립)
                     .amount(5000L)
-                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.01"))
-                    .expiredAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.20"))
+                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.21"))
+                    .expiredAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.30"))
                     .build();
 
             PointCreateRequestDto pointCreateRequestDto2 = PointCreateRequestDto.builder()
                     .consumer(consumer)
                     .name("테스트쿠폰2")
                     .pointStatus(PointStatus.적립)
-                    .amount(5000L)
-                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.01"))
-                    .expiredAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.19"))
+                    .amount(3000L)
+                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.21"))
+                    .expiredAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.25"))
                     .build();
 
             PointCreateRequestDto pointCreateRequestDto3 = PointCreateRequestDto.builder()
@@ -102,12 +98,14 @@ public class PointTest {
                     .name("테스트 호텔 예약")
                     .pointStatus(PointStatus.사용)
                     .amount(-6000L)
-                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.19"))
+                    .createdAt(new SimpleDateFormat("yyyy.MM.dd").parse("2022.08.21"))
                     .build();
 
             pointService.create(pointCreateRequestDto);
             pointService.create(pointCreateRequestDto2);
             pointService.create(pointCreateRequestDto3);
+
+            assertThat(consumer.getAvailablePointAmount(), is(2000L));
 
         }catch (Exception e){
             e.printStackTrace();

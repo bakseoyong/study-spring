@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "point_details")
@@ -24,13 +25,17 @@ public class PointDetail {
     private PointStatus pointStatus;
     private Long amount;
 
+    @Temporal(TemporalType.DATE)
+    private Date expiredAt;
+
     @Builder
-    public PointDetail(Consumer consumer, Long pointId, PointStatus pointStatus, Long amount, Long collectId){
+    public PointDetail(Consumer consumer, Long pointId, PointStatus pointStatus, Long amount, Long collectId, Date expiredAt){
         this.consumer = consumer;
         this.pointId = pointId;
+        this.collectId = collectId;
         this.pointStatus = pointStatus;
         this.amount = amount;
-        this.collectId = collectId;
+        this.expiredAt = expiredAt;
     }
 
     public void setCollectId() {
