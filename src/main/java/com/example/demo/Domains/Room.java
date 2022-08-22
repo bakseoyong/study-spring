@@ -12,6 +12,12 @@ import java.util.Date;
 @Table(name = "rooms")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+//날짜별로 바뀌는 룸을 어떻게 저장할지 => Nosql 을 사용하자! => redis는 nestjs에서 쓰고 있으니까 mongoDB를 사용해 보자.
+//{
+//  {date : "2022.08.22", price : "99000", "salePercent" : "67"},
+//  {date : "2022.08.23", price : "90000", "salePercent" : "0"}
+// }
+//날짜별로 조회할떄는 다른 값들은 변경되지 않고 가격부분만 변경된다. => RoomPrice를 만들어서 nosql로 빠르게 IO하는게 좋을 것 같다.
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,11 +30,7 @@ public class Room {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Long price;
-
-    @Column(nullable = true)
-    private Long salePercent;
+    private Long standardPrice;
 
     private Long standardPersonNum;
 
@@ -42,12 +44,11 @@ public class Room {
     private Date checkinStarted;
 
     @Builder
-    public Room(Business business, String name, Long price, Long salesPercent, Long standardPersonNum, Long maximumPersonNum,
+    public Room(Business business, String name, Long standardPrice, Long standardPersonNum, Long maximumPersonNum,
                 boolean noSmoking, String information, Date checkinStarted){
         this.business = business;
         this.name = name;
-        this.price = price;
-        this.salePercent = salesPercent;
+        this.standardPrice = standardPrice;
         this.standardPersonNum = standardPersonNum;
         this.maximumPersonNum = maximumPersonNum;
         this.noSmoking = noSmoking;

@@ -30,7 +30,8 @@ public class Consumer extends User{
     @OneToMany(mappedBy = "consumer")
     private List<ConsumerCoupon> consumerCoupons = new ArrayList<>();
 
-
+    @OneToMany(mappedBy = "consumer")
+    private List<ConsumerWishlist> consumerWishlists = new ArrayList<>();
 
     public void setAvailablePointAmount(Long amount){
         if (availablePointAmount + amount < 0) {
