@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Document(collection = "room_prices")
@@ -21,8 +22,11 @@ public class RoomPrice {
     @Id
     private String id;
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    @Column(nullable = false)
+    private Long roomId;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @Column(nullable = false)
     private Long price;
@@ -31,7 +35,8 @@ public class RoomPrice {
     private Long salePercent;
 
     @Builder
-    public RoomPrice(Date date, Long price, Long salePercent){
+    public RoomPrice(Long roomId, LocalDate date, Long price, Long salePercent){
+        this.roomId = roomId;
         this.date = date;
         this.price = price;
         this.salePercent = salePercent;
