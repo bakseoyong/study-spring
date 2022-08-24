@@ -1,9 +1,8 @@
 package com.example.demo.Domains;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import lombok.Builder;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 
 public class Review {
@@ -13,17 +12,24 @@ public class Review {
 
     private Long score;
 
-    @OneToOne
+    @OneToMany
+    @JoinColumn(name = "consumer_id")
     private Consumer consumer;
 
     private LocalDate writtenAt;
 
-    @OneToOne
-    private Business business;
-
-    @OneToOne
+    @OneToMany
+    @JoinColumn(name = "room_id")
     private Room room;
 
     private String content;
 
+    @Builder
+    public Review(Long score, Consumer consumer, LocalDate writtenAt, Room room, String content){
+        this.score = score;
+        this.consumer = consumer;
+        this.writtenAt = writtenAt;
+        this.room = room;
+        this.content = content;
+    }
 }
