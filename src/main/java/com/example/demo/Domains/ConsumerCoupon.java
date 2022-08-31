@@ -17,7 +17,7 @@ public class ConsumerCoupon {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "consumer_id")
     private Consumer consumer;
 
     @ManyToOne

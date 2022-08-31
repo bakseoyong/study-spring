@@ -33,6 +33,9 @@ public class Consumer extends User{
     @OneToMany(mappedBy = "consumer")
     private List<ConsumerWishlist> consumerWishlists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "consumer")
+    private List<Review> reviews = new ArrayList<>();
+
     public void setAvailablePointAmount(Long amount){
         if (availablePointAmount + amount < 0) {
             throw new IllegalArgumentException("Try to spend more points than you have");

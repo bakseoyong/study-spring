@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +45,7 @@ public class BusinessTest {
                 .maximumPersonNum(2L)
                 .noSmoking(true)
                 .information("와인 무료제공 스탠다드 트윈")
-                .checkinStarted(new SimpleDateFormat("HH:mm:ss").parse("15:00:00"))
+                .checkinStarted(LocalTime.of(15, 0))
                 .build();
 
         roomRepository.save(room);

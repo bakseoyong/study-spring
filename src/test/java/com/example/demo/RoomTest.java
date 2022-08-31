@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class RoomTest {
                 .maximumPersonNum(2L)
                 .noSmoking(true)
                 .information("와인 무료제공 스탠다드 트윈")
-                .checkinStarted(new SimpleDateFormat("HH:mm:ss").parse("15:00:00"))
+                .checkinStarted(LocalTime.of(15, 0))
                 .build();
 
         roomRepository.save(room);

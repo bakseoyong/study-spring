@@ -2,7 +2,7 @@ package com.example.demo;
 
 import com.example.demo.Domains.*;
 import com.example.demo.Repositories.BusinessRepository;
-import com.example.demo.Repositories.ReservationRepository;
+import com.example.demo.Repositories.ReviewRepository;
 import com.example.demo.Repositories.RoomRepository;
 import com.example.demo.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,14 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-public class ReservationTest {
+public class ReviewTest {
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     @Autowired
     private BusinessRepository businessRepository;
 
@@ -27,11 +29,16 @@ public class ReservationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
-
     @BeforeEach
     public void setUp(){
+        Consumer consumer = Consumer.builder()
+                .id("consumerTest")
+                .password("qwer1234")
+                .email("test@test.com")
+                .build();
+
+        userRepository.save(consumer);
+
         Business business = Business.builder()
                 .businessType(BusinessType.호텔)
                 .name("테스트호텔")
@@ -54,60 +61,31 @@ public class ReservationTest {
 
         roomRepository.save(room);
 
-        Consumer consumer = Consumer.builder()
-                .id("consumerTest")
-                .password("qwer1234")
-                .email("test@test.com")
+        Review review = Review.builder()
+                .score(10L)
+                .consumer(consumer)
+                .content("너무 좋아요.")
+                .room(room)
                 .build();
 
-        userRepository.save(consumer);
+        reviewRepository.save(review);
     }
 
     @Test
-    public void 비회원_예약_실패_초과인원(){
+    public void 점수_입력_오류(){
+        Consumer consumer = (Consumer) userRepository.findAll().get(0);
         Room room = roomRepository.findAll().get(0);
 
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-            Reservation reservation = Reservation.builder()
-                    .contractorName("박서용")
-                    .phone("010-0101-0101")
-                    .checkinAt(LocalDate.of(2022, 8, 25))
-                    .checkoutAt(LocalDate.of(2022, 8, 29))
-                    .personNum(3L)
+            Review review = Review.builder()
+                    .score(11L)
+                    .consumer(consumer)
+                    .content("너무 좋아요.")
                     .room(room)
                     .build();
         });
 
-        assertEquals(exception.getMessage(), "인원수가 방의 최대수용가능 인원을 초과합니다.");
+        assertEquals(exception.getMessage(), "0 ~ 10점 사이만 입력할 수 있습니다.");
     }
 
-    @Test
-    public void 비회원_예약_성공(){
-        Room room = roomRepository.findAll().get(0);
-
-        Reservation reservation = Reservation.builder()
-                .contractorName("박서용")
-                .phone("010-0101-0101")
-                .checkinAt(LocalDate.of(2022, 8, 25))
-                .checkoutAt(LocalDate.of(2022, 8, 29))
-                .personNum(1L)
-                .room(room)
-                .build();
-    }
-
-    @Test
-    public void 회원_예약_성공(){
-        Room room = roomRepository.findAll().get(0);
-
-        Consumer consumer = (Consumer) userRepository.findAll().get(0);
-
-        Reservation reservation = Reservation.builder()
-                .consumer(consumer)
-                .phone("010-0101-0101")
-                .checkinAt(LocalDate.of(2022, 8, 25))
-                .checkoutAt(LocalDate.of(2022, 8, 29))
-                .personNum(1L)
-                .room(room)
-                .build();
-    }
 }

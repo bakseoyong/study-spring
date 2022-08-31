@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "rooms")
@@ -40,12 +40,11 @@ public class Room {
 
     private String information;
 
-    @Temporal(TemporalType.TIME)
-    private Date checkinStarted;
+    private LocalTime checkinStarted;
 
     @Builder
     public Room(Business business, String name, Long standardPrice, Long standardPersonNum, Long maximumPersonNum,
-                boolean noSmoking, String information, Date checkinStarted){
+                boolean noSmoking, String information, LocalTime checkinStarted){
         this.business = business;
         this.name = name;
         this.standardPrice = standardPrice;
