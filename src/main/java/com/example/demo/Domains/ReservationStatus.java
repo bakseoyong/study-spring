@@ -3,7 +3,6 @@ package com.example.demo.Domains;
 public enum ReservationStatus {
     결제대기중("payment_waiting"),
     결제완료("payment_success"),
-    결제실패("payment_fail"),
     예약완료("reservation_success"),
     예약취소("reservation_cancel"),
     종료("end");

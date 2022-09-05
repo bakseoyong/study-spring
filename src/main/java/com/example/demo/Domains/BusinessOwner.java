@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DiscriminatorValue("BusinessOwner_Type")
 public class BusinessOwner extends User{
-    //사장님 - 비즈니스의 예약상태 확인
-    @OneToMany
-    private Business business;
+    @OneToMany()
+    private List<Business> businesses;
 
     @Builder
     BusinessOwner(String id, String password, String email){

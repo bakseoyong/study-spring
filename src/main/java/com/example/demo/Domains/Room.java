@@ -42,6 +42,10 @@ public class Room {
 
     private LocalTime checkinStarted;
 
+    private Long reviewTotalScore;
+
+    private Long reviewNum;
+
     @Builder
     public Room(Business business, String name, Long standardPrice, Long standardPersonNum, Long maximumPersonNum,
                 boolean noSmoking, String information, LocalTime checkinStarted){
@@ -53,5 +57,29 @@ public class Room {
         this.noSmoking = noSmoking;
         this.information = information;
         this.checkinStarted = checkinStarted;
+        this.reviewTotalScore = 0L;
+        this.reviewNum = 0L;
+    }
+
+    private void setRoomNum(Long num){
+        if(reviewNum + num < 0)
+            throw new IllegalArgumentException("리뷰 개수는 0 미만이 될 수 없습니다.");
+        reviewNum += num;
+    }
+
+    private void setReviewTotalScore(Long score){
+        if(reviewTotalScore + score < 0)
+            throw new IllegalArgumentException("총 평점은 0 미만이 될 수 없습니다.");
+        reviewTotalScore += score;
+    }
+
+    public void createReview(Review review) {
+        setRoomNum(1L);
+        this.setReviewTotalScore(review.getScore());
+    }
+
+    public void deletedReview(Review review){
+        setRoomNum(-1L);
+        this.setReviewTotalScore(review.getScore());
     }
 }
