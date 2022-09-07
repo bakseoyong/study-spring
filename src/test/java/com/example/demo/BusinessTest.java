@@ -1,8 +1,11 @@
 package com.example.demo;
 
-import com.example.demo.Domains.*;
+import com.example.demo.Business.Domain.Business;
+import com.example.demo.Business.Domain.BusinessType;
 import com.example.demo.Repositories.BusinessRepository;
 import com.example.demo.Repositories.RoomRepository;
+import com.example.demo.Room.Domain.FacilitiesService;
+import com.example.demo.Room.Domain.Room;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 
 import static org.hamcrest.CoreMatchers.is;

@@ -1,9 +1,10 @@
 package com.example.demo;
 
-import com.example.demo.Domains.*;
-import com.example.demo.Dtos.PointCreateRequestDto;
+import com.example.demo.Point.Dto.PointCreateRequestDto;
+import com.example.demo.Point.Domain.PointStatus;
 import com.example.demo.Repositories.UserRepository;
-import com.example.demo.Services.PointService;
+import com.example.demo.Point.Service.PointService;
+import com.example.demo.User.Domain.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

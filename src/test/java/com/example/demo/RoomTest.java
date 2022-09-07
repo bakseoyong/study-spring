@@ -1,11 +1,15 @@
 package com.example.demo;
 
-import com.example.demo.Domains.*;
-import com.example.demo.Dtos.RoomPriceSearchRequestDto;
-import com.example.demo.MongoDB.RoomPriceRepository;
+import com.example.demo.Business.Domain.Business;
+import com.example.demo.Business.Domain.BusinessType;
+import com.example.demo.Room.Dto.RoomPriceSearchRequestDto;
+import com.example.demo.Room.Domain.FacilitiesService;
+import com.example.demo.Room.Repository.RoomPriceMongoRepository;
 import com.example.demo.Repositories.BusinessRepository;
 import com.example.demo.Repositories.RoomRepository;
-import com.example.demo.Services.RoomPriceService;
+import com.example.demo.Room.Domain.Room;
+import com.example.demo.Room.Domain.RoomPrice;
+import com.example.demo.Room.Service.RoomPriceService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +33,7 @@ public class RoomTest {
     @Autowired
     private RoomPriceService roomPriceService;
     @Autowired
-    private RoomPriceRepository roomPriceRepository;
+    private RoomPriceMongoRepository roomPriceMongoRepository;
 
     @Autowired
     private RoomRepository roomRepository;
@@ -78,12 +82,12 @@ public class RoomTest {
         List<RoomPrice> roomPrices = new ArrayList<>();
         roomPrices.add(roomPrice);
         roomPrices.add(roomPrice2);
-        roomPriceRepository.saveAll(roomPrices);
+        roomPriceMongoRepository.saveAll(roomPrices);
     }
 
     @AfterEach
     public void clear() throws Exception{
-        this.roomPriceRepository.deleteAll();
+        this.roomPriceMongoRepository.deleteAll();
     }
 
     @Test

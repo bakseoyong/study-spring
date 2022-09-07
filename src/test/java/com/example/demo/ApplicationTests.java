@@ -1,8 +1,8 @@
 package com.example.demo;
 
-import com.example.demo.Domains.Department;
-import com.example.demo.Domains.Student;
-import com.example.demo.Domains.User;
+import com.example.demo.User.Domain.Department;
+import com.example.demo.User.Domain.Student;
+import com.example.demo.User.Domain.User;
 import com.example.demo.Repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

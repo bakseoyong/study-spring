@@ -1,10 +1,14 @@
 package com.example.demo;
 
-import com.example.demo.Domains.*;
-import com.example.demo.Dtos.DiscountConditionDto;
+import com.example.demo.Coupon.Domain.ConsumerCoupon;
+import com.example.demo.Coupon.Domain.Coupon;
+import com.example.demo.Coupon.Domain.CouponType;
+import com.example.demo.Coupon.Domain.DiscountType;
+import com.example.demo.Coupon.Dto.DiscountConditionDto;
 import com.example.demo.Repositories.ConsumerCouponRepository;
 import com.example.demo.Repositories.CouponRepository;
 import com.example.demo.Repositories.UserRepository;
+import com.example.demo.User.Domain.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

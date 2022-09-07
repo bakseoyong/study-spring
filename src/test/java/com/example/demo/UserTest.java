@@ -1,9 +1,9 @@
 package com.example.demo;
 
-import com.example.demo.Domains.Advertiser;
-import com.example.demo.Domains.Department;
-import com.example.demo.Domains.Manager;
-import com.example.demo.Domains.Student;
+import com.example.demo.User.Domain.Advertiser;
+import com.example.demo.User.Domain.Department;
+import com.example.demo.User.Domain.Manager;
+import com.example.demo.User.Domain.Student;
 import com.example.demo.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
