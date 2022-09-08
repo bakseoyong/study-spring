@@ -5,7 +5,12 @@ import com.example.demo.Reservation.Domain.Reservation;
 import com.example.demo.Repositories.ReservationRepository;
 import com.example.demo.Reservation.Dto.ReservationCreateRequestDto;
 import com.example.demo.Room.Domain.RemainingRoom;
+import com.example.demo.Room.Domain.Room;
+import com.example.demo.Room.Domain.RoomPrice;
+import com.example.demo.Room.Dto.RoomPriceSearchRequestDto;
 import com.example.demo.Room.Repository.RemainingRoomMongoRepository;
+import com.example.demo.Room.Repository.RoomPriceMongoRepository;
+import com.example.demo.Room.Service.RoomPriceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +21,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
+    private final RoomPriceService roomPriceService;
+
     private final ReservationRepository reservationRepository;
     private final BillingRepository billingRepository;
 
@@ -23,32 +30,77 @@ public class ReservationService {
 
     @Transactional
     public void createReservation(ReservationCreateRequestDto reservationCreateRequestDto){
-        //방 매진되었는지 확인 => RemainingRoom.isSoldOut (X) , Repository에서 가져와야 한다.
-        LocalDate startedAt = reservationCreateRequestDto.getStartedAt();
-        LocalDate endedAt = reservationCreateRequestDto.getEndedAt();
-        Long roomId = reservationCreateRequestDto.getRoomId();
+        Reservation reservation = Reservation.builder()
+                .phone(reservationCreateRequestDto.getPhone())
+                .checkinAt(reservationCreateRequestDto.getCheckinAt())
+                .checkoutAt(reservationCreateRequestDto.getCheckoutAt())
+                .consumer(reservationCreateRequestDto.getConsumer())
+                .contractorName(reservationCreateRequestDto.getContratorName())
+                .personNum(reservationCreateRequestDto.getPersonNum())
+                .room(reservationCreateRequestDto.getRoom())
+                .build();
+
+        Long price = roomPriceService.search(RoomPriceSearchRequestDto.builder().build());
 
         List<RemainingRoom> remainingRooms =
-                remainingRoomMongoRepository.isRoomSoldOutBetweenStartedAtAndEndedAt(roomId, startedAt, endedAt);
+                remainingRoomMongoRepository.findNumberOfRemainingRoomBetweenStartedAtAndEndedAt(
+                        reservation.getRoom().getId(), reservation.getCheckinAt(), reservation.getCheckoutAt()
+                );
 
-        for(RemainingRoom remainingRoom : remainingRooms){
-            if(remainingRoom.getNumberOfRemainingRoom() == 0){
-                throw new RemainingRoomNotExistException();
-            }
-        }
+        Billing billing = reservationCreateRequestDto.toBilling(price); //결제예정 Status
 
-        Reservation reservation = reservationCreateRequestDto.toReservation();
-        Billing billing = reservationCreateRequestDto.toBilling(); //결제예정 Status
-
+        /**
+         * 결제가 먼저일지, 남은 방의 개수를 감소시키는게 먼저일지 고민중.
+         */
         billing.payReservationPrice(); //결제 실패시 throw new FailPaymentException
 
+        for(RemainingRoom remainingRoom : remainingRooms){
+            remainingRoom.setNumberOfRemainingRoom(-1); //남은 방이 없을시 ValidationException
+        }
+
+        remainingRoomMongoRepository.saveAll(remainingRooms);
         reservationRepository.save(reservation);
         billingRepository.save(billing);
     }
 
-    public void updateReservation(UpdateReservationRequestDto updateReservationRequestDto){
-        Reservation reservation = reservationRepository.findOne(updateReservationRequestDto.getReservationId());
-        reservation.update();
+    //같은 숙소 방을 변경해서 예약하기, 체크인 체크아웃 날짜 수정하기, 방 인원 변경하기 => 업데이트로 뭉치기엔 결이 너무 달라서 , 비즈니스 로직이 확실하게 구분되어
+    //따로 구현하는게 좋을 것 같다.
+    //변경을 하고 변경을 또 한다던가, 변경을 하고 예약취소한 경우 오류가 없도록 신경써야함!
+    public void changeReservedRoom(ReservationUpdateRoomDto reservationUpdateRoomDto){
+        Reservation reservation = reservationRepository.findOne(reservationUpdateRoomDto.getReservationId());
+        Billing billing = billingRepository.findOne(reservationUpdateRoomDto.getBillingId());
+
+        Room reservedRoom = reservation.getRoom();
+        Room wantRoom = reservationUpdateRoomDto.getRoomId();
+        LocalDate startedAt = reservation.getCheckinAt();
+        LocalDate endedAt = reservation.getCheckoutAt();
+
+        //변경을 원하는 방구조의 개수를 탐색한다 ( 유효성 검사 X )
+        List<RemainingRoom> remainingRooms =
+                remainingRoomMongoRepository.
+                        findNumberOfRemainingRoomBetweenStartedAtAndEndedAt(wantRoom.getId(), startedAt, endedAt);
+
+        //변경된 가격을 추출한다.
+        Long extraFee = roomPriceService.search(RoomPriceSearchRequestDto.builder().build()) -
+                roomPriceService.search(RoomPriceSearchRequestDto.builder().build());
+
+        //빌링도메인의 납부금액을 추가할지 환급할지 경정한다.
+        if(extraFee > 0){
+            //추가 납부
+            //추가 납부의 경우에는 로직이 여기서 안끝나게 되는데 정말 어렵다.............
+        }else{
+            //환급
+        }
+
+        //기존방의 잔여방개수를 1늘린다.
+
+        //
+        for(RemainingRoom remainingRoom: remainingRooms){
+            remainingRoom.setNumberOfRemainingRoom(-1);
+        }
+
+        remainingRoomMongoRepository.saveAll(remainingRooms);
+
     }
 
     public void showReservations(ShowReservationsDto showReservationsDto){}

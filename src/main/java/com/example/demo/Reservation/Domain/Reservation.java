@@ -131,4 +131,6 @@ public class Reservation {
     }
 
     public void paymentComplete(){}
+
+    public void changeRoom(){}
 }

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.validation.ValidationException;
 import java.time.LocalDate;
 
 /**{
@@ -30,5 +31,12 @@ public class RemainingRoom {
     private LocalDate date;
 
     @Column(nullable = false)
-    private Long numberOfRemainingRoom;
+    private int numberOfRemainingRoom;
+
+    public void setNumberOfRemainingRoom(int numberOfRemainingRoom) {
+        if(this.numberOfRemainingRoom + numberOfRemainingRoom < 0L){
+            throw new ValidationException("결제 진행과정 중 이미 방이 매진되었습니다.");
+        }
+        this.numberOfRemainingRoom += numberOfRemainingRoom;
+    }
 }
