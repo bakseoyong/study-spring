@@ -1,6 +1,9 @@
 package com.example.demo.Billing.Domain;
 
+import com.example.demo.Reservation.Domain.ImPortResponse;
 import com.example.demo.Reservation.Domain.Reservation;
+import com.example.demo.Reservation.Exception.FailedProcessingImPortException;
+import com.example.demo.utils.Exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,38 +28,31 @@ public class Billing {
     @Column()
     private BillingStatus billingStatus;
 
-    @OneToOne()
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "billing")
     private Reservation reservation;
 
     @Column(nullable = false)
     private Long price;
 
     @Builder
-    public Billing(Reservation reservation, BillingStatus billingStatus, Long price){
+    public Billing(Reservation reservation, PaymentType paymentType, BillingStatus billingStatus, Long price){
         this.reservation = reservation;
+        this.paymentType = paymentType;
         this.billingStatus = billingStatus;
+        if(price == null){
+            throw new FailedProcessingImPortException(ErrorCode.IMPORT_PROCESSING_FAIL);
+        }
         this.price = price;
     }
 
-    public void payReservationPrice(){
-        //if(KG.sendPaymentRequest()){
-            billingStatus = BillingStatus.결제완료;
-        //}else{
-        //  billingStatus = BillingStatus.결제실패
-        //  throw new FailPaymentException(status, code, message);
-        //
+    public void cancel(ImPortResponse imPortResponse){
+        if(!imPortResponse.getSuccess()){
+            throw new FailedProcessingImPortException(ErrorCode.IMPORT_PROCESSING_FAIL);
+        }
+        this.billingStatus = BillingStatus.환급예정;
     }
 
-    public void paybackReservationPrice(){
-//        if(KG.sendPaybackRequest()){
-            billingStatus = BillingStatus.환급예정;
-//        }else{
-//            throw new FailPaybackException(status, code, message);
-//        }
-    }
-
-    //billing을 취소할 생각부터 하니까 구현하기가 너무 힘들다. 예약을 성공한 경우부터 구현해야 떠오를듯!
-    public createCancelBilling(){
-
+    public void addReservation(Reservation reservation){
+        this.reservation = reservation;
     }
 }

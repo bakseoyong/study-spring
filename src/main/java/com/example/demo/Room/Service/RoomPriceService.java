@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.List;
 
@@ -35,5 +36,25 @@ public class RoomPriceService {
         amount += (period.getDays() - roomPrices.size()) * room.getStandardPrice();
 
         return amount;
+    }
+
+    @Transactional
+    public Long cancelFee(Long roomId, LocalDate checkinAt, LocalDate checkoutAt){
+        Long cancelFee = 0L;
+        List<RoomPrice> roomPrices = this.roomPriceMongoRepository
+                .findByRoomIdWhereBetweenStartedAndEnded(roomId, checkinAt, checkoutAt);
+
+        for(RoomPrice roomPrice: roomPrices){
+            Period period = Period.between(LocalDate.now(), roomPrice.getDate());
+
+            if (period.getDays() >= 3 || (period.getDays() == 2 && LocalTime.now().getHour() <= 17)) {
+                cancelFee += roomPrice.getPrice();
+            } else if ((period.getDays() == 2 && LocalTime.now().getHour() >= 17) ||
+                    period.getDays() == 1 && LocalTime.now().getHour() <= 17) {
+                cancelFee += (long) (roomPrice.getPrice() * 0.5);
+            }
+        }
+
+        return cancelFee;
     }
 }

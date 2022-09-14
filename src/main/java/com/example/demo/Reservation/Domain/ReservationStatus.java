@@ -1,8 +1,6 @@
 package com.example.demo.Reservation.Domain;
 
 public enum ReservationStatus {
-    결제대기중("payment_waiting"),
-    결제완료("payment_success"),
     예약완료("reservation_success"),
     예약취소("reservation_cancel"),
     체크인("checkin"),

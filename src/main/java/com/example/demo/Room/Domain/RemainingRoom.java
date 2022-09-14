@@ -2,6 +2,7 @@ package com.example.demo.Room.Domain;
 
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -33,9 +34,16 @@ public class RemainingRoom {
     @Column(nullable = false)
     private int numberOfRemainingRoom;
 
+    @Builder
+    RemainingRoom(Long roomId, LocalDate date, int numberOfRemainingRoom){
+        this.roomId = roomId;
+        this.date = date;
+        this.numberOfRemainingRoom = numberOfRemainingRoom;
+    }
+
     public void setNumberOfRemainingRoom(int numberOfRemainingRoom) {
         if(this.numberOfRemainingRoom + numberOfRemainingRoom < 0L){
-            throw new ValidationException("결제 진행과정 중 이미 방이 매진되었습니다.");
+            throw new ValidationException("남은 방의 개수가 0 미만일 수 없습니다.");
         }
         this.numberOfRemainingRoom += numberOfRemainingRoom;
     }

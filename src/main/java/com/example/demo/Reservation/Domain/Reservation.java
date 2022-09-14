@@ -1,20 +1,22 @@
 package com.example.demo.Reservation.Domain;
 
-import com.example.demo.User.Domain.Consumer;
+import com.example.demo.Billing.Domain.Billing;
 import com.example.demo.Room.Domain.Room;
+import com.example.demo.User.Domain.User;
 import com.example.demo.utils.Exception.ErrorCode;
-import com.example.demo.utils.Exception.NotCancelReservationException;
+import com.example.demo.Reservation.Exception.NotCancelReservationException;
+import com.example.demo.utils.Generator.ReservationIdGenerator;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.ValidationException;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.Period;
 
 @Entity
@@ -22,7 +24,16 @@ import java.time.Period;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
+    private static final String PROCEDURE_PARAM = "RESERVATION";
+
     @Id
+//    @GenericGenerator(name = "ReservationIdGenerator",
+//        strategy = "com.example.demo.utils.Generator.ReservationIdGenerator",
+//        parameters = @org.hibernate.annotations.Parameter(
+//                name = ReservationIdGenerator.RESERVATION_ID_GENERATOR_KEY,
+//                value = PROCEDURE_PARAM
+//        ))
+//    @GeneratedValue(generator = "ReservationIdGenerator")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -32,8 +43,9 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    @ManyToOne
-    private Consumer consumer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User guest;
 
     @Column(nullable = false)
     private String contractorName;
@@ -43,22 +55,30 @@ public class Reservation {
     private String phone;
 
     //@OneToOne(fetch = FetchType.LAZY)
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
+    @Column(nullable = false)
     private LocalDate checkinAt;
 
+    @Column(nullable = false)
     private LocalDate checkoutAt;
 
+    @Column(nullable = false)
     private Long personNum;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "billing_id")
+    private Billing billing;
+
     @Builder
-    public Reservation(Consumer consumer, String contractorName,
+    public Reservation(User guest, String contractorName,
                        String phone, Room room, LocalDate checkinAt, LocalDate checkoutAt, Long personNum){
-        this.consumer = consumer;
+        this.guest = guest;
         this.contractorName = contractorName;
         this.reservationAt = LocalDateTime.now();
-        this.reservationStatus = ReservationStatus.결제대기중;
+        this.reservationStatus = ReservationStatus.예약완료;
         this.phone = phone;
         this.room = room;
         this.checkinAt = validateCheckinAt(checkinAt);
@@ -97,40 +117,23 @@ public class Reservation {
     }
 
     public void cancel(){
-        Long cancelFeePercent;
-
-        Period period = Period.between(LocalDate.now(), checkinAt);
-
         if(reservationStatus.equals(ReservationStatus.노쇼) ||
                 reservationStatus.equals(ReservationStatus.체크인) ||
                 reservationStatus.equals(ReservationStatus.체크아웃)) {
             throw new NotCancelReservationException(ErrorCode.RESERVATION_NOT_CANCLED_STATUS);
         }
-
-        if(period.getDays() >= 3 || (period.getDays() == 2 && LocalTime.now().getHour() <= 17)){
-            cancelFeePercent = 0L;
-        }else if((period.getDays() == 2 && LocalTime.now().getHour() >= 17) ||
-        period.getDays() == 1 && LocalTime.now().getHour() <= 17){
-            cancelFeePercent = 50L;
-        }else{
-            cancelFeePercent = 100L;
-        }
-
-        //취소에도 본인취소, 숙박업소에서 취소 (매개변수 추가)
-        //취소 사유도 자연재해에 따라 , =-> 이런건 enum없이 reason필드에 추가
-        //취소되었으면 돈은 언제 지급될건지. 지급은 완료된상태인건지도 enum에 추가
-
-        // + 같은숙소 방변경, 같은숙소 날짜변경까지 구현가능하면 좋을듯!
-        //예약이 2박이상이면 날짜별로 환불규정이 다름.
-
         reservationStatus = ReservationStatus.예약취소;
     }
 
-    public void closeReservation(ReservationStatus reservationStatus){
-        this.reservationStatus = reservationStatus;
+    public void addBilling(Billing billing){
+        this.billing = billing;
     }
 
-    public void paymentComplete(){}
+    //1. 본인이 체크아웃하기. 2. 업주가 체크아웃 처리하기
+    // => 체크아웃이 필요한경우 1.소비자가 주문목록을 조회한 경우. 2. 업주가 정산목록을 조회하는 경우
+    //결제와 정산
+    public void checkout(){
+        reservationStatus = ReservationStatus.체크아웃;
 
-    public void changeRoom(){}
+    }
 }

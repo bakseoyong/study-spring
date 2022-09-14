@@ -20,6 +20,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DiscriminatorValue("Consumer_Type")
 public class Consumer extends User{
+    private String name;
+    private String phone;
     private String nickname;
 
     @OneToMany(mappedBy = "consumer")
@@ -53,9 +55,11 @@ public class Consumer extends User{
     }
 
     @Builder
-    Consumer(String id, String password, String email, String nickname){
+    Consumer(String id, String password, String email, String nickname, String name, String phone){
         super(id, password, email);
         this.nickname = nickname;
+        this.name = name;
+        this.phone = phone;
         this.availablePointAmount = 0L;
         this.after15DayExpiredPointAmount = 0L;
     }

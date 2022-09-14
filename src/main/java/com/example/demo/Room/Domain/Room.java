@@ -1,6 +1,7 @@
 package com.example.demo.Room.Domain;
 
 import com.example.demo.Business.Domain.Business;
+import com.example.demo.Reservation.Domain.Reservation;
 import com.example.demo.Review.Domain.Review;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "rooms")
@@ -47,6 +49,9 @@ public class Room {
     private Long reviewTotalScore;
 
     private Long reviewNum;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<Reservation> reservations;
 
     @Builder
     public Room(Business business, String name, Long standardPrice, Long standardPersonNum, Long maximumPersonNum,

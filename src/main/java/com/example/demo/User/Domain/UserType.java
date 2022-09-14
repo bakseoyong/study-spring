@@ -1,10 +1,12 @@
 package com.example.demo.User.Domain;
 
 public enum UserType {
+
     VISITOR("visitor"),
     STUDENT("student"),
     ADVERTISER("advertiser"),
     ADMIN("admin");
+
     
     private String value;
     
