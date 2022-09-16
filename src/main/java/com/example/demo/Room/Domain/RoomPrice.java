@@ -65,4 +65,13 @@ public class RoomPrice {
         }
         return salePercent;
     }
+
+    public Long addPrice(Long price){
+        return price + this.price - (this.price / 100 * salePercent);
+    }
+
+    public void update(Long price, Long salePercent){
+        this.price = validatePrice(price);
+        this.salePercent = validatePercent(salePercent);
+    }
 }
