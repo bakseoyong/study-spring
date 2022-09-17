@@ -60,7 +60,7 @@ public class RoomPrice {
     }
 
     private Long validatePercent(Long salePercent){
-        if(price < 0 || price > 100){
+        if(salePercent < 0 || salePercent > 100){
             throw new IllegalArgumentException("0 ~ 100 사이의 값만 입력할 수 있습니다.");
         }
         return salePercent;
