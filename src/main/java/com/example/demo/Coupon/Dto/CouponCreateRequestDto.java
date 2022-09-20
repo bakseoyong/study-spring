@@ -36,6 +36,13 @@ public class CouponCreateRequestDto {
     }
 
     public Coupon toEntity(){
-        return new Coupon(name, couponType, discountType, discountAmount, maximumDiscount, discountConditionDto);
+        return Coupon.builder()
+                .name(name)
+                .couponType(couponType)
+                .discountType(discountType)
+                .discountAmount(discountAmount)
+                .maximumDiscount(maximumDiscount)
+                .discountConditionDto(discountConditionDto)
+                .build();
     }
 }

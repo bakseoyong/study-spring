@@ -3,7 +3,7 @@ package com.example.demo.Coupon.Service;
 import com.example.demo.Coupon.Domain.Coupon;
 import com.example.demo.Coupon.Dto.CouponCreateRequestDto;
 import com.example.demo.Coupon.Dto.CouponCreateResponseDto;
-import com.example.demo.Repositories.CouponRepository;
+import com.example.demo.Coupon.Repository.CouponRepository;
 import org.springframework.stereotype.Service;
 
 @Service
