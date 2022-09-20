@@ -4,7 +4,7 @@ import com.example.demo.User.Domain.Advertiser;
 import com.example.demo.User.Domain.Department;
 import com.example.demo.User.Domain.Manager;
 import com.example.demo.User.Domain.Student;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.User.Repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

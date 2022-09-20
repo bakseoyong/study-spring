@@ -17,13 +17,13 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long uuid;
+    private Long id;
 //    @GeneratedValue(generator = "uuid2")
 //    @GenericGenerator(name= "uuid2", strategy = "uuid2")
 //    @Type(type = "uuid-char")
 
     @Column(nullable = false)
-    private String id;
+    private String loginId;
 
     @Column(nullable = false)
     private String password;
@@ -31,8 +31,8 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    public User(String id, String password, String email){
-        this.id = id;
+    public User(String loginId, String password, String email){
+        this.loginId = loginId;
         this.password = password;
         this.email = email;
     }
