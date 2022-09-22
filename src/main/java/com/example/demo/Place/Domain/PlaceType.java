@@ -1,6 +1,6 @@
-package com.example.demo.Business.Domain;
+package com.example.demo.Place.Domain;
 
-public enum BusinessType {
+public enum PlaceType {
     모텔("motel"),
     호텔("hotel"),
     펜션("pension"),
@@ -19,7 +19,7 @@ public enum BusinessType {
 
     private String value;
 
-    BusinessType(String value){
+    PlaceType(String value){
         this.value = value;
     }
 
