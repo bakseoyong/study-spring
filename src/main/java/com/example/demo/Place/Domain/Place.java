@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -48,6 +50,12 @@ public class Place {
     @OneToMany(mappedBy = "place")
     private List<PlacePeriod> placePeriods;
 
+    @OneToMany(mappedBy = "place")
+    private List<Discount> discounts;
+
+    @OneToMany(mappedBy = "place")
+    private List<DayOfWeek> dayOfWeeks;
+
     @Builder
     public Place(PlaceType placeType, String name, String address, String facilitiesServices){
         this.placeType = placeType;
@@ -60,5 +68,35 @@ public class Place {
         PlacePeriodGroups placePeriodGroups = new PlacePeriodGroups(placePeriods);
         placePeriodGroups.isOverlap(placePeriod);
         placePeriods.add(placePeriod);
+    }
+
+    public void addDiscount(Discount discount){
+        this.discounts.add(discount);
+    }
+
+    public void deleteDiscount(Long discountId){
+        Iterator<Discount> iterator = discounts.iterator();
+        while(iterator.hasNext()){
+            if(iterator.next().getId().equals(discountId)){
+                iterator.remove();
+            }
+        }
+    }
+
+    public void deleteDiscountUsingStream(Long discountId){
+        discounts.stream().filter(discount -> discountId == discount.getId()).collect(Collectors.toList());
+    }
+
+    public void addDayOfWeek(DayOfWeek dayOfWeek){
+        this.dayOfWeeks.add(dayOfWeek);
+    }
+
+    public void deleteDayOfWeek(Long dayOfWeekId){
+        Iterator<DayOfWeek> iterator = dayOfWeeks.iterator();
+        while(iterator.hasNext()){
+            if(iterator.next().getId().equals(dayOfWeekId)){
+                iterator.remove();
+            }
+        }
     }
 }
