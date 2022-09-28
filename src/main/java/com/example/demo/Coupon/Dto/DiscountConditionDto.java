@@ -4,14 +4,17 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Getter
 public class DiscountConditionDto {
-    private Timestamp checkinStarted;
 
-    private Timestamp checkinEnded;
+    private int atLeastFewDaysAgo;
+    private LocalDate checkinPeriodStarted;
 
-    private boolean atLeastAccommodation;
+    private LocalDate checkinPeriodEnded;
+
+    private int atLeastAccommodation;
 
     private boolean notAvailableInfinityCouponRoom;
 
@@ -22,11 +25,12 @@ public class DiscountConditionDto {
     private boolean atWeekend;
 
     @Builder
-    public DiscountConditionDto(Timestamp checkinStarted, Timestamp checkinEnded,
-                                boolean atLeastAccommodation, boolean notAvailableInfinityCouponRoom,
+    public DiscountConditionDto(int atLeastFewDaysAgo, LocalDate checkinPeriodStarted, LocalDate checkinPeriodEnded,
+                                int atLeastAccommodation, boolean notAvailableInfinityCouponRoom,
                                 Long minimumOrderAmount, boolean notAvailableSpecific, boolean atWeekend) {
-        this.checkinStarted = checkinStarted;
-        this.checkinEnded = checkinEnded;
+        this.atLeastFewDaysAgo = atLeastFewDaysAgo;
+        this.checkinPeriodStarted = checkinPeriodStarted;
+        this.checkinPeriodEnded = checkinPeriodEnded;
         this.atLeastAccommodation = atLeastAccommodation;
         this.notAvailableInfinityCouponRoom = notAvailableInfinityCouponRoom;
         this.minimumOrderAmount = minimumOrderAmount;

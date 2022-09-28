@@ -1,4 +1,4 @@
-package com.example.demo.Repositories;
+package com.example.demo.Point.Repository;
 
 import com.example.demo.User.Domain.Consumer;
 import com.example.demo.Point.Domain.PointDetail;

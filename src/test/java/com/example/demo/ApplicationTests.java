@@ -3,7 +3,7 @@ package com.example.demo;
 import com.example.demo.User.Domain.Department;
 import com.example.demo.User.Domain.Student;
 import com.example.demo.User.Domain.User;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.User.Repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

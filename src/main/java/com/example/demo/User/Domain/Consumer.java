@@ -2,6 +2,7 @@ package com.example.demo.User.Domain;
 
 
 import com.example.demo.Coupon.Domain.ConsumerCoupon;
+import com.example.demo.Coupon.Domain.Coupon;
 import com.example.demo.Wishlist.Domain.ConsumerWishlist;
 import com.example.demo.Review.Domain.Review;
 import com.example.demo.Point.Domain.Point;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -43,6 +45,15 @@ public class Consumer extends User{
     @OneToMany(mappedBy = "consumer")
     private List<Review> reviews = new ArrayList<>();
 
+    @Builder
+    Consumer(String id, String password, String email, String nickname, String name, String phone){
+        super(id, password, email);
+        this.nickname = nickname;
+        this.name = name;
+        this.phone = phone;
+        this.availablePointAmount = 0L;
+        this.after15DayExpiredPointAmount = 0L;
+    }
     public void setAvailablePointAmount(Long amount){
         if (availablePointAmount + amount < 0) {
             throw new IllegalArgumentException("Try to spend more points than you have");
@@ -54,13 +65,9 @@ public class Consumer extends User{
         after15DayExpiredPointAmount += amount;
     }
 
-    @Builder
-    Consumer(String id, String password, String email, String nickname, String name, String phone){
-        super(id, password, email);
-        this.nickname = nickname;
-        this.name = name;
-        this.phone = phone;
-        this.availablePointAmount = 0L;
-        this.after15DayExpiredPointAmount = 0L;
+    public List<Coupon> getCoupons(){
+        return this.getConsumerCoupons().stream()
+                .map(consumerCoupon -> consumerCoupon.getCoupon())
+                .collect(Collectors.toList());
     }
 }

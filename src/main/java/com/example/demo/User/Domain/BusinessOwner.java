@@ -1,6 +1,6 @@
 package com.example.demo.User.Domain;
 
-import com.example.demo.Business.Domain.Business;
+import com.example.demo.Place.Domain.Place;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import java.util.List;
 @DiscriminatorValue("BusinessOwner_Type")
 public class BusinessOwner extends User{
     @OneToMany()
-    private List<Business> businesses;
+    private List<Place> places;
 
     @Builder
     BusinessOwner(String id, String password, String email){

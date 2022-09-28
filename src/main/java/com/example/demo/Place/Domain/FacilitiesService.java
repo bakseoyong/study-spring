@@ -1,4 +1,4 @@
-package com.example.demo.Room.Domain;
+package com.example.demo.Place.Domain;
 
 public enum FacilitiesService {
     애견동반("0"),

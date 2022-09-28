@@ -1,6 +1,6 @@
 package com.example.demo.Wishlist.Domain;
 
-import com.example.demo.Business.Domain.Business;
+import com.example.demo.Place.Domain.Place;
 import com.example.demo.User.Domain.Consumer;
 
 import javax.persistence.*;
@@ -18,5 +18,5 @@ public class ConsumerWishlist {
 
     @ManyToOne
     @JoinColumn(name = "business_id")
-    private Business business;
+    private Place place;
 }

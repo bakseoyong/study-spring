@@ -1,13 +1,13 @@
 package com.example.demo;
 
-import com.example.demo.Business.Domain.Business;
-import com.example.demo.Business.Domain.BusinessType;
-import com.example.demo.Repositories.BusinessRepository;
-import com.example.demo.Repositories.ReviewRepository;
-import com.example.demo.Repositories.RoomRepository;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Place.Domain.Place;
+import com.example.demo.Place.Domain.PlaceType;
+import com.example.demo.Place.Repository.PlaceRepository;
+import com.example.demo.Review.Repository.ReviewRepository;
+import com.example.demo.Room.Repository.RoomRepository;
+import com.example.demo.User.Repository.UserRepository;
 import com.example.demo.Review.Domain.Review;
-import com.example.demo.Room.Domain.FacilitiesService;
+import com.example.demo.Place.Domain.FacilitiesService;
 import com.example.demo.Room.Domain.Room;
 import com.example.demo.User.Domain.Consumer;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ public class ReviewTest {
     private ReviewRepository reviewRepository;
 
     @Autowired
-    private BusinessRepository businessRepository;
+    private PlaceRepository placeRepository;
 
     @Autowired
     private RoomRepository roomRepository;
@@ -44,17 +44,17 @@ public class ReviewTest {
 
         userRepository.save(consumer);
 
-        Business business = Business.builder()
-                .businessType(BusinessType.호텔)
+        Place place = Place.builder()
+                .businessType(PlaceType.호텔)
                 .name("테스트호텔")
                 .address("테스트광역시 테스트구 테스트동 1-1")
                 .facilitiesServices(FacilitiesService.노래방 + "." + FacilitiesService.사우나)
                 .build();
 
-        businessRepository.save(business);
+        placeRepository.save(place);
 
         Room room = Room.builder()
-                .business(business)
+                .business(place)
                 .name("테스트룸")
                 .standardPrice(80000L)
                 .standardPersonNum(2L)

@@ -2,7 +2,7 @@ package com.example.demo;
 
 import com.example.demo.Point.Dto.PointCreateRequestDto;
 import com.example.demo.Point.Domain.PointStatus;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.User.Repository.UserRepository;
 import com.example.demo.Point.Service.PointService;
 import com.example.demo.User.Domain.Consumer;
 import org.junit.jupiter.api.BeforeEach;

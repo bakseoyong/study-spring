@@ -14,9 +14,9 @@ import javax.persistence.ParameterMode;
 import java.io.Serializable;
 import java.util.Properties;
 
-public class ReservationIdGenerator implements IdentifierGenerator //Configurable deprecated
+public class IdGenerator implements IdentifierGenerator //Configurable deprecated
 {
-    public static final String RESERVATION_ID_GENERATOR_KEY = "procedureParam";
+    public static final String ID_GENERATOR_KEY = "procedureParam";
     private String procedureParam;
 
     @Override
@@ -34,7 +34,7 @@ public class ReservationIdGenerator implements IdentifierGenerator //Configurabl
 
     @Override
     public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) throws MappingException {
-        this.procedureParam = ConfigurationHelper.getString(RESERVATION_ID_GENERATOR_KEY, params);
+        this.procedureParam = ConfigurationHelper.getString(ID_GENERATOR_KEY, params);
     }
 
 }
