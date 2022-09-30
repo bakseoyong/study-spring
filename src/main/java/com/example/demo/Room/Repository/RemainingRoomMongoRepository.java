@@ -12,4 +12,6 @@ public interface RemainingRoomMongoRepository extends MongoRepository<RemainingR
     @Query("{ roomId : ?0, 'date' : {$gte : ?1, $lt : ?2} }")
     List<RemainingRoom> isRoomSoldOutBetweenStartedAtAndEndedAt(Long roomId, LocalDate startedAt, LocalDate endedAt);
 
+    @Query("{'id' : {$in : ?0}, 'date' : {$gte : ?1, $lt : ?2} }")
+    List<RemainingRoom> findRemainingRoomInRoomIds(List<Long> roomIds, LocalDate startedAt, LocalDate endedAt);
 }

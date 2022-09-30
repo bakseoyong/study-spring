@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class DayOfWeek {
+public class ChangeOfDay {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -25,10 +26,13 @@ public class DayOfWeek {
     @ManyToOne
     private Place place;
 
+    private DayOfWeek dayOfWeek;
+
     @Builder
-    public DayOfWeek(LocalDate date, String content, String display) {
+    public ChangeOfDay(LocalDate date, String content, String display, DayOfWeek dayOfWeek) {
         this.date = date;
         this.content = content;
         this.display = display;
+        this.dayOfWeek = dayOfWeek;
     }
 }

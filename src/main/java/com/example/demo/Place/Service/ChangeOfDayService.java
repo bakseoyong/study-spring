@@ -1,6 +1,6 @@
 package com.example.demo.Place.Service;
 
-import com.example.demo.Place.Domain.DayOfWeek;
+import com.example.demo.Place.Domain.ChangeOfDay;
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.Place.Repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,19 +11,19 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class DayOfWeekService {
+public class ChangeOfDayService {
     private final PlaceRepository placeRepository;
 
     public void create(Long placeId, String date, String content, String display){
         Place place = placeRepository.findById(placeId).orElseThrow(EntityNotFoundException::new);
 
-        DayOfWeek dayOfWeek = DayOfWeek.builder()
+        ChangeOfDay changeOfDay = ChangeOfDay.builder()
                 .date(LocalDate.parse(date))
                 .content(content)
                 .display(display)
                 .build();
 
-        place.addDayOfWeek(dayOfWeek);
+        place.addChangeOfDay(changeOfDay);
     }
 
     public void delete(Long placeId, Long dayOfWeekId){

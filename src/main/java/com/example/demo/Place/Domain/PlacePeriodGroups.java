@@ -32,4 +32,15 @@ public class PlacePeriodGroups {
             }
         }
     }
+
+    public PriceType findPriceTypeByLocalDate(PriceType defaultPriceType, LocalDate localDate) {
+        for (PlacePeriod placePeriod : placePeriods) {
+            if (placePeriod.getStartedAt().minusDays(1).isAfter(localDate) &&
+                    placePeriod.getEndedAt().plusDays(1).isBefore(localDate)) {
+                return placePeriod.getPriceType();
+            }
+        }
+
+        return defaultPriceType;
+    }
 }

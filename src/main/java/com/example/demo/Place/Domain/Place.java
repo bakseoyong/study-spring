@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +56,7 @@ public class Place {
     private List<Discount> discounts;
 
     @OneToMany(mappedBy = "place")
-    private List<DayOfWeek> dayOfWeeks;
+    private List<ChangeOfDay> changeOfDays;
 
     @Builder
     public Place(PlaceType placeType, String name, String address, String facilitiesServices){
@@ -87,16 +89,23 @@ public class Place {
         discounts.stream().filter(discount -> discountId == discount.getId()).collect(Collectors.toList());
     }
 
-    public void addDayOfWeek(DayOfWeek dayOfWeek){
-        this.dayOfWeeks.add(dayOfWeek);
+    public void addChangeOfDay(ChangeOfDay changeOfDay){
+        this.changeOfDays.add(changeOfDay);
     }
 
-    public void deleteDayOfWeek(Long dayOfWeekId){
-        Iterator<DayOfWeek> iterator = dayOfWeeks.iterator();
+    public void deleteDayOfWeek(Long changeOfDayId){
+        Iterator<ChangeOfDay> iterator = changeOfDays.iterator();
         while(iterator.hasNext()){
-            if(iterator.next().getId().equals(dayOfWeekId)){
+            if(iterator.next().getId().equals(changeOfDayId)){
                 iterator.remove();
             }
         }
+    }
+
+    public PriceType getDefaultPriceType(){
+        return this.getPriceTypes().stream()
+                .filter(priceType -> priceType.getTypeName() == "비수기")
+                .findAny()
+                .orElseThrow(EntityNotFoundException::new);
     }
 }

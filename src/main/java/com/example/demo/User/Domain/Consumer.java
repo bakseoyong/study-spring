@@ -3,6 +3,7 @@ package com.example.demo.User.Domain;
 
 import com.example.demo.Coupon.Domain.ConsumerCoupon;
 import com.example.demo.Coupon.Domain.Coupon;
+import com.example.demo.Coupon.Domain.CouponGroups;
 import com.example.demo.Wishlist.Domain.ConsumerWishlist;
 import com.example.demo.Review.Domain.Review;
 import com.example.demo.Point.Domain.Point;
@@ -70,4 +71,5 @@ public class Consumer extends User{
                 .map(consumerCoupon -> consumerCoupon.getCoupon())
                 .collect(Collectors.toList());
     }
+
 }

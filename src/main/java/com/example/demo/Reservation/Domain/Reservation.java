@@ -1,16 +1,15 @@
 package com.example.demo.Reservation.Domain;
 
 import com.example.demo.Billing.Domain.Billing;
+import com.example.demo.Coupon.Domain.ConsumerCoupon;
 import com.example.demo.Room.Domain.Room;
 import com.example.demo.User.Domain.User;
 import com.example.demo.utils.Exception.ErrorCode;
 import com.example.demo.Reservation.Exception.NotCancelReservationException;
-import com.example.demo.utils.Generator.ReservationIdGenerator;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.ValidationException;
@@ -18,6 +17,7 @@ import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.List;
 
 @Entity
 @Table(name = "reservations")
@@ -27,13 +27,13 @@ public class Reservation {
     private static final String PROCEDURE_PARAM = "RESERVATION";
 
     @Id
-//    @GenericGenerator(name = "ReservationIdGenerator",
-//        strategy = "com.example.demo.utils.Generator.ReservationIdGenerator",
+//    @GenericGenerator(name = "IdGenerator",
+//        strategy = "com.example.demo.utils.Generator.IdGenerator",
 //        parameters = @org.hibernate.annotations.Parameter(
-//                name = ReservationIdGenerator.RESERVATION_ID_GENERATOR_KEY,
+//                name = IdGenerator.ID_GENERATOR_KEY,
 //                value = PROCEDURE_PARAM
 //        ))
-//    @GeneratedValue(generator = "ReservationIdGenerator")
+//    @GeneratedValue(generator = "IdGenerator")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -54,7 +54,6 @@ public class Reservation {
     @Pattern(regexp = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$")
     private String phone;
 
-    //@OneToOne(fetch = FetchType.LAZY)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
@@ -71,6 +70,15 @@ public class Reservation {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "billing_id")
     private Billing billing;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<ReservationDetail> reservationDetails;
+
+    @OneToOne()
+    //예약 취소시 쿠폰이 반납되기 때문에
+    private ConsumerCoupon appliedCoupon;
+
+    private Long appliedPointAmount;
 
     @Builder
     public Reservation(User guest, String contractorName,
@@ -90,19 +98,17 @@ public class Reservation {
         LocalDate standard = LocalDate.now().minusDays(1);
         Period period = Period.between(standard, checkinAt);
 
-        if (period.getYears() < 0 || period.getMonths() < 0 || period.getDays() < 0){
+        if(checkinAt.isBefore(standard)){
             throw new ValidationException("오늘보다 이전 날짜를 입력할 수 없습니다.");
         }
         return checkinAt;
-
-        //이미 해당 날짜에 예약이 차있는지 확인해야한다.
     }
 
     private LocalDate validateCheckoutAt(LocalDate checkinAt, LocalDate checkoutAt){
         Period period = Period.between(checkinAt, checkoutAt);
 
-        //대실인 경우 같은날짜에 체크아웃이 가능. 대실과 숙박을 구분하는 코드가 필요할 것 같다. 추후 수정
-        if(period.getYears() < 0 || period.getMonths() < 0 || period.getDays() < 0){
+        //대실인 경우 같은날짜에 체크아웃이 가능. 대실과 숙박을 구분하는 코드가 필요할 것 같다. 추후 수정 => 대실 방과 숙박 방이 따로 있다.
+        if(checkoutAt.isBefore(checkinAt)){
             throw new ValidationException("체크아웃 날짜는 체크인 날짜보다 이전일 수 없습니다.");
         }
         return checkoutAt;

@@ -2,49 +2,85 @@ package com.example.demo.Reservation.Service;
 
 import com.example.demo.Billing.Domain.Billing;
 import com.example.demo.Billing.Domain.BillingStatus;
-import com.example.demo.Billing.Repository.BillingRepository;
-import com.example.demo.Repositories.RoomRepository;
-import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Coupon.Domain.Coupon;
+import com.example.demo.Coupon.Domain.CouponGroups;
+import com.example.demo.Place.Domain.ChangeOfDayGroups;
+import com.example.demo.Place.Domain.Place;
+import com.example.demo.Place.Domain.PlacePeriodGroups;
+import com.example.demo.Place.Domain.PriceType;
+import com.example.demo.Reservation.Dto.*;
+import com.example.demo.Reservation.Repository.ReservationDetailRepository;
+import com.example.demo.Room.Repository.RoomRepository;
+import com.example.demo.User.Repository.UserRepository;
 import com.example.demo.Reservation.Domain.ImPortResponse;
 import com.example.demo.Reservation.Domain.Reservation;
-import com.example.demo.Repositories.ReservationRepository;
-import com.example.demo.Reservation.Dto.ReservationCancelDto;
-import com.example.demo.Reservation.Dto.ReservationCreateRequestDto;
-import com.example.demo.Reservation.Dto.ReservationCancelRequestDto;
-import com.example.demo.Reservation.Dto.ReservationSuccessDto;
+import com.example.demo.Reservation.Repository.ReservationRepository;
+import com.example.demo.Reservation.Domain.ReservationDetail;
 import com.example.demo.Reservation.Exception.FailedProcessingImPortException;
 import com.example.demo.Room.Domain.RemainingRoom;
 import com.example.demo.Room.Domain.Room;
 import com.example.demo.Room.Repository.RemainingRoomMongoRepository;
-import com.example.demo.Room.Service.RemainingRoomService;
-import com.example.demo.Room.Service.RoomPriceService;
 import com.example.demo.User.Domain.Consumer;
 import com.example.demo.User.Domain.NonConsumer;
 import com.example.demo.User.Domain.User;
-import com.example.demo.User.Domain.UserType;
 import com.example.demo.utils.Exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
-    private static final Long NON_USER = -1L;
-
+    private final RoomPriceMongoRepository roomPriceMongoRepository;
     private final RemainingRoomMongoRepository remainingRoomMongoRepository;
     private final ReservationRepository reservationRepository;
-    private final BillingRepository billingRepository;
+    private final ReservationDetailRepository reservationDetailRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
+    //체크인
     @Transactional
-    public ReservationSuccessDto createReservation(ReservationCreateRequestDto reservationCreateRequestDto){
+    public ReservationInfoReadResponseDto reservationPage(
+            ReservationInfoReadRequestDto reservationInfoReadRequestDto){
+        Consumer consumer = null;
+        Coupon maximumDiscountCoupon = null;
+
+        Long roomId = reservationInfoReadRequestDto.getRoomId();
+        Long consumerId = reservationInfoReadRequestDto.getConsumerId();
+        LocalDate checkinAt = reservationInfoReadRequestDto.getCheckinAt();
+        LocalDate checkoutAt = reservationInfoReadRequestDto.getCheckoutAt();
+        Long totalPrice = reservationInfoReadRequestDto.getTotalPrice();
+
+        //방 도메인
+        Room room = roomRepository.findById(roomId).orElseThrow(EntityNotFoundException::new);
+
+        if(consumerId != null){
+            consumer = (Consumer) userRepository.findById(consumerId).orElseThrow(EntityNotFoundException::new);
+
+            //쿠폰 도메인
+            List<Coupon> coupons = consumer.getCoupons();
+            CouponGroups couponGroups = new CouponGroups(coupons);
+            //가장 최대로 할일받을 수 있는 쿠폰을 먼저 적용
+            maximumDiscountCoupon = couponGroups.getAvailableCoupons(checkinAt, checkoutAt, room, totalPrice).get(0);
+        }
+
+        return new ReservationInfoReadResponseDto(room, checkinAt, checkoutAt, totalPrice, consumer, maximumDiscountCoupon);
+    }
+
+    @Transactional
+    public ReservationSuccessDto createReservation(ReservationCreateRequestDto reservationCreateRequestDto) {
+        Long roomId = reservationCreateRequestDto.getRoomId();
+        LocalDate checkinAt = reservationCreateRequestDto.getCheckinAt();
+        LocalDate checkoutAt = reservationCreateRequestDto.getCheckoutAt();
+
         ImPortResponse imPortResponse = reservationCreateRequestDto.getImPortResponse();
-        if(!imPortResponse.getSuccess()){
+        if (!imPortResponse.getSuccess()) {
             throw new FailedProcessingImPortException(ErrorCode.IMPORT_PROCESSING_FAIL);
         }
 
@@ -52,29 +88,49 @@ public class ReservationService {
                 .orElseThrow(EntityNotFoundException::new);
 
         List<RemainingRoom> remainingRooms = remainingRoomMongoRepository.isRoomSoldOutBetweenStartedAtAndEndedAt(
-                reservationCreateRequestDto.getRoomId(),
-                reservationCreateRequestDto.getCheckinAt(),
-                reservationCreateRequestDto.getCheckoutAt()
+                roomId, checkinAt, checkoutAt
         );
+        //remaining 유효성 검사
 
         //비회원 구분
         User guest = null;
-        if(reservationCreateRequestDto.getIsConsumer()) {
+        if (reservationCreateRequestDto.getIsConsumer()) {
             guest = (Consumer) userRepository.findById(reservationCreateRequestDto.getConsumerId())
                     .orElseThrow(EntityNotFoundException::new);
-        }else{
+        } else {
             guest = NonConsumer.toEntity();
         }
 
         Reservation reservation = Reservation.builder()
                 .phone(reservationCreateRequestDto.getPhone())
-                .checkinAt(reservationCreateRequestDto.getCheckinAt())
-                .checkoutAt(reservationCreateRequestDto.getCheckoutAt())
+                .checkinAt(checkinAt)
+                .checkoutAt(checkoutAt)
                 .guest(guest)
                 .contractorName(reservationCreateRequestDto.getContractorName())
                 .personNum(reservationCreateRequestDto.getPersonNum())
                 .room(room)
                 .build();
+
+        Place place = room.getPlace();
+        PlacePeriodGroups placePeriodGroups = new PlacePeriodGroups(place.getPlacePeriods());
+        PriceType defaultPriceType = place.getDefaultPriceType();
+        ChangeOfDayGroups changeOfDayGroups = new ChangeOfDayGroups(place.getChangeOfDays());
+
+        List<ReservationDetail> reservationDetails = new ArrayList<>();
+        for(LocalDate d = checkinAt; d.isBefore(checkoutAt); d=d.plusDays(1)) {
+            DayOfWeek dayOfWeek = changeOfDayGroups.updateDayOfWeekIfChangeOfDayExist(d);
+            PriceType priceType = placePeriodGroups.findPriceTypeByLocalDate(defaultPriceType, d);
+            Long originalPrice = room.findOriginalPrice(priceType, dayOfWeek);
+            Long discountPrice = room.getDiscountPrice(d, originalPrice, dayOfWeek);
+
+            ReservationDetail reservationDetail = ReservationDetail.builder()
+                    .date(d)
+                    .price(originalPrice)
+                    .reservation(reservation)
+                    .build();
+
+            reservationDetails.add(reservationDetail);
+        }
 
         Billing billing = Billing.builder()
                 .reservation(reservation)
@@ -89,31 +145,34 @@ public class ReservationService {
             remainingRoom.setNumberOfRemainingRoom(-1);
         }
 
+        //이것도 fetch 따지면 모름.
+        reservationDetailRepository.saveAll(reservationDetails);
         remainingRoomMongoRepository.saveAll(remainingRooms);
         roomRepository.save(room);
         userRepository.save(guest);
 
         return ReservationSuccessDto.builder()
-                .businessName(reservation.getRoom().getBusiness().getName())
-                .roomName(reservation.getRoom().getName())
-                .checkinAt(reservation.getCheckinAt())
-                .checkoutAt(reservation.getCheckoutAt())
-                .price(reservation.getBilling().getPrice())
-        .build();
+            .businessName(reservation.getRoom().getPlace().getName())
+            .roomName(reservation.getRoom().getName())
+            .checkinAt(reservation.getCheckinAt())
+            .checkoutAt(reservation.getCheckoutAt())
+            .price(reservation.getBilling().getPrice())
+            .build();
     }
 
     @Transactional
     public ReservationCancelDto cancelReservation(ReservationCancelRequestDto reservationCancelRequestDto){
         Reservation reservation = reservationRepository.findById(reservationCancelRequestDto.getReservationId())
                 .orElseThrow(EntityNotFoundException::new);
-//        Billing billing = billingRepository.findById(reservationCancelRequestDto.getBillingId())
-//                        .orElseThrow(EntityNotFoundException::new);
+        Billing billing = reservation.getBilling();
+
         List<RemainingRoom> remainingRooms = remainingRoomMongoRepository.isRoomSoldOutBetweenStartedAtAndEndedAt(
                 reservation.getRoom().getId(), reservation.getCheckinAt(), reservation.getCheckoutAt()
         );
 
         reservation.cancel();
-        reservation.getBilling().cancel(reservationCancelRequestDto.getImPortResponse());
+
+        billing.cancel(reservationCancelRequestDto.getImPortResponse());
 
         for(RemainingRoom remainingRoom: remainingRooms){
             remainingRoom.setNumberOfRemainingRoom(1);
@@ -123,7 +182,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         return ReservationCancelDto.builder()
-                .businessName(reservation.getRoom().getBusiness().getName())
+                .businessName(reservation.getRoom().getPlace().getName())
                 .roomName(reservation.getRoom().getName())
                 .checkinAt(reservation.getCheckinAt())
                 .checkoutAt(reservation.getCheckoutAt())
