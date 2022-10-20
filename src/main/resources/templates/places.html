@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>이름</th>
+                <th>기준인원</th>
+                <th>최대인원</th>
+                <th>타입</th>
+                <th>원가</th>
+                <th>할인가</th>
+                <th>예약페이지이동</th>
+            </tr>
+        </thead>
+        <tbody>
+            <p></p>
+<!--            <tr th:if="${placeDto.empty}">-->
+<!--                <td colspan="2"> No Books Available </td>-->
+<!--            </tr>-->
+            <tr th:each="roomDto, num : ${placeDto.roomDtos}">
+                <td th:text="${roomDto.name}"> 이름 </td>
+                <td th:text="${roomDto.standardPersonNum}"> 기준인원 </td>
+                <td th:text="${roomDto.maximumPersonNum}"> 최대인원 </td>
+                <td th:text="${roomDto.type}"> 타입 </td>
+                <td th:text="${roomDto.originalPrice}"> 원가 </td>
+                <td th:text="${roomDto.discountPrice}"> 할인가 </td>
+                <td>
+                    <a th:href="@{/reservation/new(id=${roomDto.id})}">예약페이지이동</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
