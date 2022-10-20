@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+    <!-- iamport.payment.js -->
+    <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.8.js"></script>
+    <script type="text/javascript" th:src="@{/js/iamport.js}"></script>
+    <input type="text" id="totalPrice">
+    <input type="text" id="memberEmail">
+    <input type="text" id="memberName">
+    <button th:onclick="requestPay()">결제하기</button>
+</body>
+
+
+</html>

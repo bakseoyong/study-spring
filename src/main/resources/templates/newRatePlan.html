@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form role="form" method="post">
+        <div th:object="${ratePlanDto}">
+            <p> Cancel Fee Policy </p>
+            <button name="CFP" id="CFP1"> flexible - 1 day </button>
+            <button name="CFP" id="CFP2"> flexible - 3 days </button>
+            <button name="CFP" id="CFP3"> flexible - 5 days </button>
+            <button name="CFP" id="CFP4"> Non - Refund </button>
+
+
+
+            <p> Price Policy </p>
+            <p>Weekday : <input th:field="*{weekdayPrice}" type="text"></p>
+            <p>Fri : <input th:field="*{fridayPrice}" type="text"></p>
+            <p>Weekend: <input th:field="*{weekendPrice}" type="text"></p>
+
+            <p> Discount Policy </p>
+            <a> Fixed Discount Policy </a>
+                <p>Weekday : <input th:field="*{weekdayDiscountPrice}" type="text"></p>
+                <p>Fri : <input th:field="*{fridayDiscountPrice}" type="text"></p>
+                <p>Weekend: <input th:field="*{weekendDiscountPrice}" type="text"></p>
+            <a> Percent Discount Policy </a>
+                <p>Weekday : <input th:field="*{weekdayDiscountPrice}" type="text"></p>
+                <p>Fri : <input th:field="*{fridayDiscountPrice}" type="text"></p>
+                <p>Weekend: <input th:field="*{weekendDiscountPrice}" type="text"></p>
+        </div>
+    </form>
+</body>
+</html>
