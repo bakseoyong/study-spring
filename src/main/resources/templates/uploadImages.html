@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form th:action="@{/api/images/save}" th:object="${multiUploadDto}" method="post" enctype="multipart/form-data" >
+      파일선택 : <input type="file" multiple="multiple" name="files" th:field="*{uploadDtos}">
+      <input type="submit" value="전송">
+    </form>
+</body>
+</html>
