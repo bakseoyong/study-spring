@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>방 추가</h1>
+    <h1>장소도메인-테스트호텔</h1>
+
+    <form th:action="@{/api/v2/room/save}" th:object="${newRoomDto}" id="newRoomForm" method="post" enctype="multipart/form-data">
+        <table>
+            <thead>
+                <tr>
+                    <th>방 이름</th>
+                    <th>기준인원</th>
+                    <th>최대인원</th>
+                    <th>기준가격</th>
+                    <th>이미지 업로드</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <input type="text" th:field="*{name}" name="name"/>
+                    </td>
+                    <td>
+                        <input type="text" th:field="*{standardPersonNum}" name="standardPersonNum"/>
+                    </td>
+                    <td>
+                        <input type="text" th:field="*{maximumPersonNum}" name="maximumPersonNum"/>
+                    </td>
+                    <td>
+                        <input type="file" id="multipartFile" name="multipartFile" multiple="multiple"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <input type="submit" value="전송">
+    </form>
+
+
+</body>
+</html>

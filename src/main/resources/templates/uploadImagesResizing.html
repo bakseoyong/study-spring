@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-    <form th:action="@{/api/images/save}" method="post" enctype="multipart/form-data" >
+    <form th:action="@{/api/v2/image/save}" method="post" enctype="multipart/form-data" >
       파일선택 : <input type="file" id="file" name="file">
       <input type="submit" value="전송">
     </form>

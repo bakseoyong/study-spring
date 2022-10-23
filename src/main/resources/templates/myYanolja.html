@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h1>프로필</h1>
+    <div>
+        <img th:src="@{${myYanoljaDto.profileImagePath}}" th:if="${myYanoljaDto.profileImagePath != null}"/>
+    </div>
+    <span th:text="${myYanoljaDto.nickname}"></span>
+
+
+  <h1>예약 내역</h1>
+  <div>
+    <a href="/reservation/history/domestic">국내여행 통합예약</a>
+    <a href="/reservation/history/abroad">해외여행 통합예약</a>
+  </div>
+</body>
+</html>
