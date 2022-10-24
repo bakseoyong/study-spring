@@ -15,6 +15,7 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,29 @@ public class ImageService {
             System.out.println("multipartFile to file. file name : " + file.getName());
 
             imageResizing(file, imageType);
+        }catch (IOException e){
+            //예외가 발생하더라도 여기서 처리해야 한다.
+            //여기서 처리하는 방법 => 정상적으로 동작하지 않았다는 responseEntity를 보내주면 될듯????
+            //responseEntity에 대해 공부하고 작성해 보자. => 추후에 설정
+        }
+
+    }
+
+    public void saveMultipartFiles(List<MultipartFile> multipartFiles, ImageType imageType){
+        try {
+            for(MultipartFile multipartFile: multipartFiles) {
+                String name = multipartFile.getOriginalFilename();
+                File file = new File(absolutePath + "/Originals/" + name);
+                System.out.println("File Absolute Path is : " + file.getAbsolutePath());
+                file.createNewFile();
+                FileOutputStream fos = new FileOutputStream(file);
+                fos.write(multipartFile.getBytes());
+                fos.close();
+
+                System.out.println("multipartFile to file. file name : " + file.getName());
+
+                imageResizing(file, imageType);
+            }
         }catch (IOException e){
             //예외가 발생하더라도 여기서 처리해야 한다.
             //여기서 처리하는 방법 => 정상적으로 동작하지 않았다는 responseEntity를 보내주면 될듯????

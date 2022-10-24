@@ -5,22 +5,26 @@
     <title>Title</title>
 </head>
 <body>
-  <form th:action="@{/api/v2/review/save}" th:object="${newReviewDto}" method="post">
+  <form th:action="@{/api/v1/review/save}" th:object="${newReviewDto}" id="newRoomForm" method="post" enctype="multipart/form-data">
+
+    <p>사진 업로드</p>
+    <input type="file" id="multipartFile" name="multipartFile" multiple="multiple"/>
+
     <p>이곳에서의 경험은 어떠셨나요?</p>
-    <input type="text" th:field="*{overall}"/>
+    <input type="text" th:field="*{overall}" name="overall"/>
 
     <p>생생한 평가를 해주세요</p>
     <p>서비스 & 친절도 </p>
-    <input type="text" th:field="*{service}"/>
+    <input type="text" th:field="*{service}" name="service"/>
     <p>숙소 & 객실 청결도</p>
-    <input type="text" th:field="*{cleanliness}"/>
+    <input type="text" th:field="*{cleanliness}" name="cleanliness"/>
     <p>시설 & 편의성</p>
-    <input type="text" th:field="*{convenience}"/>
+    <input type="text" th:field="*{convenience}" name="convenience"/>
     <p>비품 & 용품 만족도</p>
-    <input type="text" th:field="*{satisfaction}"/>
+    <input type="text" th:field="*{satisfaction}" name="satisfaction"/>
 
     <p></p>
-    <input type="text" placeholder="이 곳에서 머물렀던 기억을 자세히 말해줄 수 있나요?(5자 이상 작성해주세요.)" th:field="*{content}">
+    <input type="text" placeholder="이 곳에서 머물렀던 기억을 자세히 말해줄 수 있나요?(5자 이상 작성해주세요.)" th:field="*{content}" name="content">
     <button type="submit" th:text="'작성하기. 예상 적립 포인트 ' + ${expectPoint}"></button>
   </form>
 </body>

@@ -5,7 +5,8 @@ import java.util.List;
 public enum ImageType {
     //width x height
     Thumbnail("300x300"),
-    UserProfile("50x50");
+    UserProfile("50x50"),
+    Review("100x100");
 
     private String value;
 
