@@ -1,6 +1,8 @@
 package com.example.demo.Image.Service;
 
+import com.example.demo.Image.Domain.Image;
 import com.example.demo.Image.Domain.ImageType;
+import com.example.demo.utils.Converter.ImagePathConverter;
 import com.example.demo.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.util.FileUtil;
@@ -15,6 +17,7 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,7 +47,9 @@ public class ImageService {
 
     }
 
-    public void saveMultipartFiles(List<MultipartFile> multipartFiles, ImageType imageType){
+    public List<String> saveMultipartFiles(List<MultipartFile> multipartFiles, ImageType imageType){
+        List<String> result = new ArrayList<>();
+
         try {
             for(MultipartFile multipartFile: multipartFiles) {
                 String name = multipartFile.getOriginalFilename();
@@ -57,7 +62,8 @@ public class ImageService {
 
                 System.out.println("multipartFile to file. file name : " + file.getName());
 
-                imageResizing(file, imageType);
+                String imagePath = imageResizing(file, imageType);
+                result.add(imagePath);
             }
         }catch (IOException e){
             //예외가 발생하더라도 여기서 처리해야 한다.
@@ -65,9 +71,23 @@ public class ImageService {
             //responseEntity에 대해 공부하고 작성해 보자. => 추후에 설정
         }
 
+        return result;
     }
 
-    public void imageResizing(File original, ImageType imageType){
+    public String getImagePaths(List<MultipartFile> multipartFiles, ImageType imageType){
+        //saveOriginalImages 로 메서드 명을 변경하면 더 적합할지 고민하기
+
+        //return saveMultipartFiles(multipartFiles, imageType);
+        //기존처럼 리턴하지 말고
+        List<String> resizedImagePaths = saveMultipartFiles(multipartFiles, imageType);
+        ImagePathConverter imagePathConverter = new ImagePathConverter();
+        List<String> subFolderImagePaths = imagePathConverter.convertToSubfolderPath(resizedImagePaths);
+        String columnData = imagePathConverter.convertToDatabaseColumn(subFolderImagePaths);
+
+        return columnData;
+    }
+
+    public String imageResizing(File original, ImageType imageType) throws IOException{
         int[] lengths = imageType.getValue();
         int resize_width = lengths[0];
         int resize_height = lengths[1];
@@ -96,11 +116,14 @@ public class ImageService {
 
             if(ImageIO.write(resizedImage, "jpg", new File(resizeImagePath))){
                 System.out.println("이미지 리사이징 성공!");
+                return resizeImagePath;
             }else{
-                System.out.println("이미지 리사이징 실패.."); //에러가 뜨지는 않았지만 실패한 경우
+                //System.out.println("이미지 리사이징 실패.."); //에러가 뜨지는 않았지만 실패한 경우
+                throw new IOException("Image Resizing Failed : Error at ImageIO.write() method");
             }
         }catch (IOException e){
             e.printStackTrace();
+            throw new IOException("Image Resizing Failed : Error at ImageIO.read() method");
         }
     }
 }
