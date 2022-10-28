@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NewReviewDto {
+    private Long roomId;
     private Double overall;
     private Double service;
     private Double cleanliness;
@@ -15,7 +16,7 @@ public class NewReviewDto {
 
     @Override
     public String toString() {
-        return overall + " " + service + " " + cleanliness + " " + convenience + " "
+        return roomId + " "  + overall + " " + service + " " + cleanliness + " " + convenience + " "
                 + satisfaction + " " + content;
     }
 }
