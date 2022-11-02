@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <table>
+        <input type="hidden" th:value="${reviewDto.reviewId}"/>
+        <tr>
+            <th>방</th>
+            <th>작성자</th>
+            <th>작성일시</th>
+            <th>평점</th>
+            <th>내용</th>
+            <th>이미지</th>
+            <th>베스트리뷰 변경</th>
+        </tr>
+        <tr th:each="bestReview: ${alreadyBestReviews}">
+            <td th:text="${bestReview.roomName}"></td>
+            <td th:text="${bestReview.writtenAt}"></td>
+            <td th:text="${bestReview.overall}"></td>
+            <td th:text="${bestReview.content}"></td>
+            <td>
+<!--                <img src=""-->
+            </td>
+            <td>
+                <form th:action="@{/api/v1/review/best/change}" th:object="${convertBestReviewDto}" method="put">
+                    <input type="hidden" th:name="bestReviewId" th:value="${bestReview.reviewId}" name="bestReviewId"/>
+                    <input type="hidden" th:name="roomId" th:value="${bestReview.roomId}" name="roomId"/>
+                    <button type="submit">변경</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

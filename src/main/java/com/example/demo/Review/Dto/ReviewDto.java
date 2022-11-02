@@ -11,7 +11,8 @@ import java.util.List;
 @Getter
 @Setter
 public class ReviewDto {
-
+    private Long placeId;
+    private Long reviewId;
     private Double overall;
     private Long consumerId;
     private String nickname;
@@ -23,8 +24,10 @@ public class ReviewDto {
     private List<String> imagePaths;
 
     @Builder
-    public ReviewDto(Double overall, Long consumerId, String nickname, LocalDateTime writtenAt,
+    public ReviewDto(Long placeId, Long reviewId, Double overall, Long consumerId, String nickname, LocalDateTime writtenAt,
                      Long roomId, String roomName, String content, String answer, List<String> imagePaths) {
+        this.placeId = placeId;
+        this.reviewId = reviewId;
         this.overall = overall;
         this.consumerId = consumerId;
         this.nickname = nickname;

@@ -45,34 +45,10 @@ public class ReviewGroups {
 
 
     public List<ReviewDto> toReviewDto(){
-        ImagePathConverter imagePathConverter = new ImagePathConverter();
         List<ReviewDto> reviewDtos = new ArrayList<>();
 
         for(Review review: reviews) {
-            List<String> imagePaths;
-
-            //imagePaths가 null일때 책임 : toReviewDto vs converter
-            //converter에게 책임을 전가하려면 convertToEntityAttribute()메서드의 응집도가 낮아짐
-            //결론 : toReviewDto
-            if(review.getImagePaths() != null){
-                imagePaths = imagePathConverter.convertToEntityAttribute(review.getImagePaths());
-            }else{
-                imagePaths = null;
-            }
-
-            reviewDtos.add(
-                    ReviewDto.builder()
-                    .roomId(review.getRoom().getId())
-                    .roomName(review.getRoom().getName())
-                    .imagePaths(imagePaths)
-                    .consumerId(review.getConsumer().getId())
-                    .nickname(review.getConsumer().getNickname())
-                    .content(review.getContent())
-                    .overall(review.getOverall())
-                    .answer(review.getAnswer())
-                    .writtenAt(review.getWrittenAt())
-                    .build()
-            );
+            reviewDtos.add(review.toDto());
         }
         return reviewDtos;
     }
