@@ -1,4 +1,7 @@
-//package com.example.demo.Review.Policy;
+package com.example.demo.Review.Policy;
+
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 //
 //import com.example.demo.Place.Domain.Place;
 //import com.example.demo.Reservation.Domain.Reservation;
@@ -12,6 +15,9 @@
 //import java.time.LocalDateTime;
 //import java.time.temporal.ChronoUnit;
 //
+public interface ReviewPolicy {
+}
+
 //public class ReviewPolicy {
 //    public void isCreatable(Reservation reservation, User user, Place place){
 //        isConsumer(user);
