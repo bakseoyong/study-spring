@@ -1,6 +1,6 @@
-package com.example.demo.Study.Repository;
+package com.example.demo.Study.Casting.Repository;
 
-import com.example.demo.Study.Parent2;
+import com.example.demo.Study.Casting.Parent2;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

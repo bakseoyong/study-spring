@@ -1,4 +1,4 @@
-package com.example.demo.Study;
+package com.example.demo.Study.Casting;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
