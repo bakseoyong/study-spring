@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h3>승차권 조회</h3>
+    <input type="hidden" th:value="${ticketDto.dptStationId}"/>
+    <span th:value="${ticketDto.tickets.get(0).dptStationName}"></span>
+    <input type="hidden" th:value="${ticketDto.arrStationId}"/>
+    <span th:value="${ticketDto.tickets.get(0).arrStationName}"></span>
+    <span th:value="${ticketDto.adultNum}"></span>
+    <span th:value="${ticketDto.date}"></span>
+
+
+    <table>
+        <tr>
+            <th>기차등급</th>
+            <th>기차번호</th>
+            <th>출발시간</th>
+            <th>출발역</th>
+            <th>도착시간</th>
+            <th>도착역</th>
+            <th>요금</th>
+        </tr>
+        <tr th:each="ticket : ${ticketDto.tickets}">
+            <td th:text="${ticket.trainGrade}"></td>
+            <td th:text="${ticket.trainNo}"></td>
+            <td th:text="${ticket.dptDateTime}"></td>
+            <td th:text="${ticket.dptStationName}"></td>
+            <td th:text="${ticket.arrDateTime}"></td>
+            <td th:text="${ticket.arrStationName}"></td>
+            <td th:text="${ticket.adultCharge} + ' * ' + ${ticket.adultNum}"></td>
+        </tr>
+    </table>
+</body>
+</html>

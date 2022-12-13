@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+  <tr>
+    <th>터미널 이름</th>
+  </tr>
+  <tr th:each="station : ${busStations}">
+    <input type="hidden" th:value="${station.terminalId}"/>
+    <td th:text="${station.terminalNm}"></td>
+  </tr>
+</table>
+</body>
+</html>
