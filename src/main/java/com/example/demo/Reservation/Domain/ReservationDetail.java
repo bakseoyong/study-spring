@@ -9,7 +9,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "reservation_details")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationDetail {
@@ -18,7 +17,7 @@ public class ReservationDetail {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id")
+    @JoinColumn(name = "reservations_id")
     private Reservation reservation;
     private LocalDate date;
     private Long price;

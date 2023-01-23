@@ -2,6 +2,7 @@ package com.example.demo.Reservation.Dto;
 
 import com.example.demo.Coupon.Domain.Coupon;
 import com.example.demo.Room.Domain.Room;
+import com.example.demo.Room.Domain.RoomDetail;
 import com.example.demo.User.Domain.Consumer;
 import com.example.demo.utils.Calculator.RefundInfoCalculator;
 import com.example.demo.utils.Converter.DayOfWeekToStringConverter;
@@ -22,15 +23,17 @@ public class ReservationInfoReadResponseDto {
     private Coupon maximumDiscountCoupon;
     private Long availablePointAmount;
 
-    public ReservationInfoReadResponseDto(Room room, LocalDate startedAt, LocalDate endedAt, Long totalPrice,
-                                   Consumer consumer,
-                                   Coupon maximumDiscountCoupon){
+    public ReservationInfoReadResponseDto(Room room, RoomDetail roomDetail,
+                                          LocalTime checkinAt, LocalTime checkoutAt,
+                                          LocalDate startedDate, LocalDate endedDate, Long totalPrice,
+                                          Consumer consumer,
+                                          Coupon maximumDiscountCoupon){
         this.placeName = room.getPlace().getName();
         this.roomName = room.getName();
-        this.dateContent = setDateContent(startedAt, endedAt);
-        this.timeContent = setTimeContent(room.getCheckinAt(),room.getCheckoutAt());
+        this.dateContent = setDateContent(startedDate, endedDate);
+        this.timeContent = setTimeContent(checkinAt, checkoutAt);
         this.totalPrice = totalPrice;
-        this.refundContent = setRefundContent(startedAt, endedAt);
+        this.refundContent = setRefundContent(startedDate, endedDate);
         if(consumer == null) {
             this.consumerName = consumer.getName();
             this.phone = consumer.getPhone();

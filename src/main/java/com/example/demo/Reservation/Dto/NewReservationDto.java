@@ -10,6 +10,7 @@ public class NewReservationDto {
     private Long placeId;
     private String placeName;
     private Long roomId;
+    private Long roomDetailId;
     private String roomName;
     private LocalDate checkinDate;
     private LocalDate checkoutDate;
@@ -30,7 +31,7 @@ public class NewReservationDto {
     private Long availablePointAmount;
 
     @Builder
-    public NewReservationDto(Long placeId, String placeName, Long roomId, String roomName,
+    public NewReservationDto(Long placeId, String placeName, Long roomId, Long roomDetailId, String roomName,
                              LocalDate checkinDate, LocalDate checkoutDate, LocalTime checkinAt, LocalTime checkoutAt,
                              Long originalPrice, Long discountPrice, Long cancelFee, String cancelFeeValidInfo, String guestName,
                              String guestPhone, Long couponId, String couponName, Long couponDiscoutPrice,
