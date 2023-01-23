@@ -12,6 +12,10 @@ import java.util.Map;
 public class ReviewGroups {
     private List<Review> reviews;
 
+//    public ReviewGroups(List<Review> reviews){
+//        this.reviews = reviews;
+//    }
+
     public ReviewGroups(List<Review> reviews){
         this.reviews = reviews;
     }
@@ -53,4 +57,13 @@ public class ReviewGroups {
         return reviewDtos;
     }
 
+    public Double getOverallRating(){
+        Double overall = 0.0;
+
+        for(Review review: reviews){
+            overall += review.getOverall();
+        }
+
+        return Math.round(overall / reviews.size() * 10) / 10.0;
+    }
 }

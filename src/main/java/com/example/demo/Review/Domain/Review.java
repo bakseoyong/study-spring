@@ -17,7 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", indexes = @Index(name = "IX_REVIEWS_01_ROOMID", columnList = "room_id"))
+//@Table(name = "reviews")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "DTYPE")
 @DiscriminatorValue("Review")

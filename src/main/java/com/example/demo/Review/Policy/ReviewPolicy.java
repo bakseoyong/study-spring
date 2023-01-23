@@ -1,6 +1,5 @@
 package com.example.demo.Review.Policy;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 //
 //import com.example.demo.Place.Domain.Place;

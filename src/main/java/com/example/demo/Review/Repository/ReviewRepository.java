@@ -25,9 +25,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query(value = "SELECT r FROM Review r WHERE r.room in (SELECT ro FROM Room ro WHERE ro.place in (SELECT p FROM Place p WHERE p.id = ?1))")
     public List<Review> findByPlaceId(Long placeId);
 
-    // limit 5 라고 했지만 Pagable or native query로 구현해 줘야 한다.
-    @Query(value = "SELECT r FROM Review r WHERE r.room.id in (SELECT ro FROM Room ro WHERE ro.place.id = ?1) ORDER BY r.writtenAt DESC")
-    public List<Review> findByPlaceIdOrderByWrittenDateLimitFive(Long placeId);
+    //최신 작성 순은 베스트 리뷰가 맨 위에 나와있다. 해당 리포지토리에서는 일반 리뷰들만 뽑아낸다.
+    @Query(value = "SELECT r FROM Review r WHERE r.room in (SELECT ro FROM Room ro WHERE ro.place.id = ?1) AND TYPE(r) IN(Review) ORDER BY r.writtenAt DESC")
+    public List<Review> findByPlaceIdOrderByWrittenAt(Long placeId);
+
+    @Query(value = "SELECT r FROM Review r WHERE r.room in (SELECT ro FROM Room ro WHERE ro.place.id = ?1) ORDER BY r.overall DESC, r.writtenAt DESC")
+    public List<Review> findByPlaceIdOrderByOverallDescAndWrittenAt(Long placeId);
+
+    @Query(value = "SELECT r FROM Review r WHERE r.room in (SELECT ro FROM Room ro WHERE ro.place.id = ?1) ORDER BY r.overall ASC, r.writtenAt DESC")
+    public List<Review> findByPlaceIdOrderByOverallAscAndWrittenAt(Long placeId);
 
     @Transactional // <= Could not extract ResultSet 오류 해결
     @Query(value = "SELECT * from reviews", nativeQuery = true)

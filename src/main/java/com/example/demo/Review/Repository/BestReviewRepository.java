@@ -13,7 +13,7 @@ public interface BestReviewRepository extends JpaRepository<BestReview, Long> {
     @Query(value = "SELECT r FROM BestReview r WHERE r.room.place.id = ?1")
     public List<Review> findBestReviewsByPlaceId(Long placeId);
 
-    @Query(value = "SELECT r FROM BestReview r WHERE r.room.place.id = ?1")
+    @Query(value = "SELECT r FROM BestReview r WHERE r.room.place.id = ?1 ORDER BY r.writtenAt DESC")
     public List<BestReview> findBestReviewsByPlaceIdTest(Long placeId);
 
 //    @Transactional

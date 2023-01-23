@@ -2,12 +2,8 @@ package com.example.demo.Review.Controller;
 
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.Place.Domain.PlaceType;
-import com.example.demo.Review.Domain.BestReview;
 import com.example.demo.Review.Domain.Review;
-import com.example.demo.Review.Dto.BestReviewRedirectDto;
-import com.example.demo.Review.Dto.NewReviewDto;
-import com.example.demo.Review.Dto.ReviewDto;
-import com.example.demo.Review.Dto.TestDto;
+import com.example.demo.Review.Dto.*;
 import com.example.demo.Review.Service.ReviewService;
 import com.example.demo.Room.Domain.Room;
 import com.example.demo.User.Domain.Consumer;
@@ -120,8 +116,8 @@ public class ReviewController {
                 .password("password")
                 .build();
         //place, room도 추가해야 dto할때 nullPointerException이 발생하지 않음.
-        Place place = Place.builder().placeType(PlaceType.펜션).name("테스트펜션").address("테스트주소").build();
-        Room room1 = Room.builder().place(place).name("테스트룸").build();
+        Place place = new Place.builder().name("테스트호텔").build();
+        Room room1 = new Room.builder().place(place).name("테스트룸").build();
 
         Review review1 = Review.builder().room(room1).consumer(consumer).overall(1.0).service(2.0).convenience(3.0).cleanliness(4.0).satisfaction(5.0).content("안녕하세요").build();
         Review review2 = Review.builder().room(room1).consumer(consumer).overall(1.0).service(2.0).convenience(3.0).cleanliness(4.0).satisfaction(5.0).content("안녕하세요").build();
@@ -163,6 +159,13 @@ public class ReviewController {
         //기존 리뷰는 다운캐스팅
         //새로운 리뷰는 업캐스팅
         reviewService.convertGeneralAndBest(reviewId, bestReviewId);
+
+        return "index";
+    }
+
+    @PostMapping(value = "/api/v1/review/answer")
+    public String saveReviewAnswer(@RequestBody ReviewAnswerDto reviewAnswerDto){
+        reviewService.setAnswer(reviewAnswerDto);
 
         return "index";
     }
