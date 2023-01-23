@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-public class TwoDaysCancelFeePolicy extends CancelFeePolicy {
+public class TwoDaysCancelFeePolicy implements CancelFeePolicy {
 
     @Override
     public Long calculate(PriceByDate priceByDate) {

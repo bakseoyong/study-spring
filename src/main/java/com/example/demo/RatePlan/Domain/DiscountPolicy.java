@@ -9,9 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class DiscountPolicy extends Policy{
-    public abstract Long calculate(PriceByDate priceByDate);
+//@Entity
+//@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public interface DiscountPolicy extends Policy{
+    public Long calculate(PriceByDate priceByDate);
 }

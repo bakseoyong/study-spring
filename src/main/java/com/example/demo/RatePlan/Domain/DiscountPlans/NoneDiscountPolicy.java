@@ -7,7 +7,7 @@ import com.example.demo.RatePlan.Domain.DiscountPolicy;
 import java.time.LocalDate;
 import java.util.Map;
 
-public class NoneDiscountPolicy extends DiscountPolicy {
+public class NoneDiscountPolicy implements DiscountPolicy {
 
     @Override
     public Long calculate(PriceByDate priceByDate) {

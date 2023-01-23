@@ -4,9 +4,12 @@ import com.example.demo.EtcDomain.PriceByDate;
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.RatePlan.DTO.PoliciesResultDto;
 import com.example.demo.RatePlan.Domain.CancelFeePlans.NoneCancelFeePolicy;
-import com.example.demo.RatePlan.Domain.DiscountPlans.NoneDiscountPolicy;
 import com.example.demo.RatePlan.Domain.PricePlans.NonePricePolicy;
-import com.example.demo.Room.Domain.Room;
+import com.example.demo.RatePlan.Domain.PricePlans.PricePolicy;
+import com.example.demo.Room.Domain.RoomDetail;
+import com.example.demo.utils.Converter.PolicyIdsConverter;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -21,19 +24,22 @@ import java.util.List;
 @Entity
 @Table(name = "rate_plans")
 @NoArgsConstructor
+@Getter
 public class RatePlan {
     @Id
+    @Column(name = "rate_plan_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne
+    @JoinColumn(name = "place_id")
     private Place place;
 
     @Column
     private String name;
 
-    @OneToMany()
-    private List<RoomRatePlan> roomRatePlans; //다대다 매핑을 일대다 다대일로 풀어낸다.
+    @OneToMany(mappedBy = "ratePlan", cascade = CascadeType.PERSIST)
+    private List<RoomDetailRatePlan> roomDetailRatePlans; //다대다 매핑을 일대다 다대일로 풀어낸다.
     @Column
     private String policyIds;
     @Transient
@@ -43,6 +49,13 @@ public class RatePlan {
         String[] ids = policyIds.split("#");
 
         return ids;
+    }
+
+    @Builder
+    public RatePlan(Place place, String name, String policyIds) {
+        this.place = place;
+        this.name = name;
+        this.policyIds = policyIds;
     }
 
     public void setPolicies(List<Policy> policies){
@@ -58,42 +71,9 @@ public class RatePlan {
                     .findAny()
                     .orElseThrow(EntityNotFoundException::new);
         }catch (EntityNotFoundException e){
-            pricePolicy = new NonePricePolicy(Place.builder()
-                    .name("MockPlace")
-                    .build(), "비금액정책");
+            pricePolicy = new NonePricePolicy();
         }
         return pricePolicy.calculate(startDate, endDate);
-    }
-
-    public PriceByDate showEachPrice(LocalDate startDate, LocalDate endDate){
-        PricePolicy pricePolicy;
-
-        try {
-            pricePolicy = (PricePolicy) policies.stream()
-                    .filter(policy -> policy.getClass() == PricePolicy.class)
-                    .findAny()
-                    .orElseThrow(EntityNotFoundException::new);
-        }catch (EntityNotFoundException e){
-            pricePolicy = new NonePricePolicy(Place.builder()
-                    .name("MockPlace")
-                    .build(), "비금액정책");
-        }
-
-        return pricePolicy.getPricePerDays(startDate, endDate);
-    }
-
-    public Long showCancelFee(PriceByDate priceByDate){
-        CancelFeePolicy cancelFeePolicy;
-        try {
-            cancelFeePolicy = (CancelFeePolicy) policies.stream()
-                    .filter(policy -> policy.getClass() == CancelFeePolicy.class)
-                    .findAny()
-                    .orElseThrow(EntityNotFoundException::new);
-        }catch (EntityNotFoundException e){
-            cancelFeePolicy = new NoneCancelFeePolicy();
-        }
-
-        return cancelFeePolicy.calculate(priceByDate);
     }
 
     public String getCancelFeeValidInfo(LocalDate startDate, LocalDate endDate){
@@ -110,37 +90,29 @@ public class RatePlan {
         return cancelFeePolicy.calculateValidDateTime(startDate, endDate);
     }
 
-    public Long showDiscountPrice(PriceByDate priceByDate){
-        DiscountPolicy discountPolicy;
-
-        try {
-            discountPolicy = (DiscountPolicy) policies.stream()
-                    .filter(policy -> policy.getClass() == DiscountPolicy.class)
-                    .findAny()
-                    .orElseThrow(EntityNotFoundException::new);
-        }catch (EntityNotFoundException e){
-            discountPolicy = new NoneDiscountPolicy();
+    public PoliciesResultDto activatePlans(LocalDate startDate, LocalDate endDate, RoomDetail roomDetail){
+        if(policies == null) {
+            PolicyIdsConverter policyIdsConverter = new PolicyIdsConverter();
+            setPolicies(policyIdsConverter.convertToEntityAttribute(policyIds));
         }
 
-        return discountPolicy.calculate(priceByDate);
-    }
+        PolicyGroups policyGroups = new PolicyGroups(policies);
 
-    public PoliciesResultDto activatePlans(LocalDate startDate, LocalDate endDate, Room room){
         Long originalPrice = this.showPrice(startDate, endDate);
         if(originalPrice == null){
-            originalPrice = room.showPrice(startDate, endDate);
+            originalPrice = roomDetail.showPrice(startDate, endDate);
         }
 
-        PriceByDate priceByDate = this.showEachPrice(startDate, endDate);
+        PriceByDate priceByDate = policyGroups.showEachPrice(startDate, endDate);
         if(priceByDate == null){
-            priceByDate = room.showEachPrice(startDate, endDate);
+            priceByDate = roomDetail.showEachPrice(startDate, endDate);
         }
 
-        Long cancelFee = this.showCancelFee(priceByDate);
+        Long cancelFee = policyGroups.showCancelFee(priceByDate);
 
         String cancelFeeValidInfo =  this.getCancelFeeValidInfo(startDate, endDate);
 
-        Long discountPrice = this.showDiscountPrice(priceByDate);
+        Long discountPrice = policyGroups.showDiscountPrice(priceByDate);
 
         return PoliciesResultDto.builder()
                 .originalPrice(originalPrice)
@@ -149,4 +121,13 @@ public class RatePlan {
                 .build();
     }
 
+    public Long getDiscountPrice(PriceByDate priceByDate){
+        if(policies == null) {
+            PolicyIdsConverter policyIdsConverter = new PolicyIdsConverter();
+            setPolicies(policyIdsConverter.convertToEntityAttribute(policyIds));
+        }
+
+        PolicyGroups policyGroups = new PolicyGroups(policies);
+        return policyGroups.showDiscountPrice(priceByDate);
+    }
 }

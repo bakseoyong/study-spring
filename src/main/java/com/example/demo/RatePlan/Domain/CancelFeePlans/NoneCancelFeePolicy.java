@@ -7,7 +7,7 @@ import com.example.demo.RatePlan.Domain.CancelFeePolicy;
 import java.time.LocalDate;
 import java.util.Map;
 
-public class NoneCancelFeePolicy extends CancelFeePolicy {
+public class NoneCancelFeePolicy implements CancelFeePolicy {
 
     @Override
     public Long calculate(PriceByDate priceByDate) {

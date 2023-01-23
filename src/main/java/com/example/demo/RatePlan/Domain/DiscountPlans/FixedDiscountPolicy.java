@@ -7,19 +7,19 @@ import com.example.demo.RatePlan.Domain.DiscountPolicy;
 import java.time.LocalDate;
 import java.util.Map;
 
-public class PercentDiscountPolicy implements DiscountPolicy {
-    private Long weekdayPercent;
-    private Long fridayPercent;
-    private Long weekendPercent;
+public class FixedDiscountPolicy implements DiscountPolicy {
+    private Long weekdayFixed;
+    private Long fridayFixed;
+    private Long weekendFixed;
 
-    public PercentDiscountPolicy(Long weekdayPercent, Long fridayPercent, Long weekendPercent) {
-        this.weekdayPercent = weekdayPercent;
-        this.fridayPercent = fridayPercent;
-        this.weekendPercent = weekendPercent;
+    public FixedDiscountPolicy(Long weekdayFixed, Long fridayFixed, Long weekendFixed) {
+        this.weekdayFixed = weekdayFixed;
+        this.fridayFixed = fridayFixed;
+        this.weekendFixed = weekendFixed;
     }
 
     @Override
-    public Long calculate(PriceByDate priceByDate) {
+    public Long calculate(PriceByDate priceByDate){
         Long discounted = 0L;
 
         for (Map.Entry<LocalDate, Long> entry : priceByDate.getPriceByDates().entrySet()) {
@@ -28,12 +28,12 @@ public class PercentDiscountPolicy implements DiscountPolicy {
 
             switch (date.getDayOfWeek()) {
                 case FRIDAY:
-                    discounted += (long) (original * (100 - fridayPercent));
+                    discounted += original - fridayFixed;
                 case SATURDAY:
                 case SUNDAY:
-                    discounted += (long) (original * (100 - weekendPercent));
+                    discounted += original - weekendFixed;
                 default:
-                    discounted += (long) (original * (100 - weekdayPercent));
+                    discounted += original - weekdayFixed;
             }
 
         }
