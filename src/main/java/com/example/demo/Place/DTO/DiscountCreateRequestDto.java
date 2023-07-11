@@ -23,7 +23,6 @@ public class DiscountCreateRequestDto {
         return Discount.builder()
                 .startedAt(LocalDate.parse(startedAt))
                 .endedAt(LocalDate.parse(endedAt))
-                .discountType(DiscountType.valueOf(discountType))
                 .weekdayAmount(weekdayAmount)
                 .friAmount(friAmount)
                 .satAmount(satAmount)

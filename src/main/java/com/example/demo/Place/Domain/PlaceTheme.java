@@ -1,6 +1,6 @@
 package com.example.demo.Place.Domain;
 
-public enum FacilitiesService {
+public enum PlaceTheme {
     애견동반("0"),
     스파_월풀_욕조("1"),
     주차가능("2"),
@@ -57,7 +57,7 @@ public enum FacilitiesService {
 
     private String value;
 
-    FacilitiesService(String value){
+    PlaceTheme(String value){
         this.value = value;
     }
 

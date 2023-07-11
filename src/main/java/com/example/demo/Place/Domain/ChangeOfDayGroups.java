@@ -1,6 +1,5 @@
 package com.example.demo.Place.Domain;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.DayOfWeek;

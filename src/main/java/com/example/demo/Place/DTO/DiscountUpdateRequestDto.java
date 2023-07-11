@@ -1,7 +1,5 @@
 package com.example.demo.Place.DTO;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;

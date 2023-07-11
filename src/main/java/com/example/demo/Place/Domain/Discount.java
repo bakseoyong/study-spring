@@ -1,8 +1,6 @@
 package com.example.demo.Place.Domain;
 
 import com.example.demo.Coupon.Domain.DiscountType;
-import com.example.demo.Room.Domain.Room;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
