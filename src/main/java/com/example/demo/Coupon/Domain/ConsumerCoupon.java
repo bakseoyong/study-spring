@@ -1,33 +1,25 @@
 package com.example.demo.Coupon.Domain;
 
 import com.example.demo.User.Domain.Consumer;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
-@Table(name = "consumer_coupons")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ConsumerCoupon {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@DiscriminatorValue(value = "Consumer")
+public class ConsumerCoupon extends CouponMiddleTable{
     @ManyToOne
     @JoinColumn(name = "consumer_id")
     private Consumer consumer;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_id")
-    private Coupon coupon;
-
-    @Builder
-    ConsumerCoupon(Consumer consumer, Coupon coupon){
+    protected ConsumerCoupon(Coupon coupon, Long remaining, Consumer consumer) {
+        super(coupon, remaining);
         this.consumer = consumer;
-        this.coupon = coupon;
+    }
+
+    public static ConsumerCoupon create(Coupon coupon, Long remaining, Consumer consumer){
+        return new ConsumerCoupon(coupon, remaining, consumer);
     }
 }

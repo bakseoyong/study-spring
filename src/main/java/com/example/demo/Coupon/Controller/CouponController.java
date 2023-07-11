@@ -25,5 +25,6 @@ public class CouponController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(couponCreateResponseDto);
+
     }
 }

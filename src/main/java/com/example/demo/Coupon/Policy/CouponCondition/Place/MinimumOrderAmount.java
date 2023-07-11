@@ -1,6 +1,7 @@
-package com.example.demo.Coupon.Policy.CouponCondition;
+package com.example.demo.Coupon.Policy.CouponCondition.Place;
 
 import com.example.demo.Coupon.Domain.CouponValidTest;
+import com.example.demo.Coupon.Policy.CouponCondition.CouponConditionPolicy;
 import com.example.demo.Coupon.VO.CouponSelectVO;
 
 public class MinimumOrderAmount implements CouponConditionPolicy {

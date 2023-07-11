@@ -1,22 +1,42 @@
 package com.example.demo.Coupon.Domain;
 
-import com.example.demo.Coupon.Dto.DiscountConditionDto;
-import com.example.demo.Room.Domain.Room;
+import com.example.demo.Coupon.Policy.CouponCondition.CouponConditionPolicy;
+import com.example.demo.Coupon.VO.CouponSelectVO;
+import com.example.demo.Discount.Domain.CouponDiscount;
+import com.example.demo.Discount.Domain.Discount;
+import com.example.demo.Discount.Domain.PointDiscount;
+import com.example.demo.Leisure.Domain.LeisureTicket;
+import com.example.demo.Reservation.Domain.Reservation;
+import com.example.demo.Room.Domain.RoomDetail;
+import com.example.demo.Stock.Domain.CouponStock;
+import com.example.demo.Stock.Domain.Stock;
+import com.example.demo.User.Domain.Consumer;
+import com.example.demo.utils.Converter.CouponConditionConverter;
+import com.example.demo.utils.Converter.CouponPropertyTypeConverter;
+import com.example.demo.utils.Exception.BusinessException;
+import com.example.demo.utils.Exception.ErrorCode;
+import com.example.demo.utils.Price;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * 추상 클래스가 되지 못한 이유
+ * 1. 연관관계 매핑 때문에
+ */
 @Entity
-@Table(name = "coupons")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Coupon {
@@ -25,8 +45,8 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "coupon")
-    private List<ConsumerCoupon> consumerCoupons =  new ArrayList<>();
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.PERSIST)
+    private List<CouponMiddleTable> couponMiddleTables =  new ArrayList<>();
 
     @Column(nullable = false)
     private String name;
@@ -35,118 +55,189 @@ public class Coupon {
     @Enumerated(EnumType.STRING)
     private CouponType couponType;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private DiscountType discountType;
-
     @Column(nullable = true)
-    private Long discountAmount;
+    private String couponDiscountConditionDBData;
 
-    @Column(nullable = true)
-    private Float discountPercent;
+    @Transient
+    private List<CouponConditionPolicy> couponConditionPolicies;
 
-    @Column(nullable = true)
-    private Long maximumDiscount;
+    private LocalDate publishedDate;
 
-    //Discount Condition Columns
-    @Column(nullable = true)
-    private LocalDate checkinPeriodStarted;
+    private LocalDate expiredDate;
 
-    @Column(nullable = true)
-    private LocalDate checkinPeriodEnded;
+    @Embedded
+    private DiscountMethod discountMethod;
 
-    private int atLeastFewDaysAgo;
-    @Column(nullable = true)
-    private int atLeastAccommodation;
+    @Embedded
+    private DiscountProperty discountProperty;
 
-    @Column(nullable = true)
-    private boolean notAvailableInfinityCouponRoom;
+    @Embedded
+    private CouponOwnerType couponOwnerType;
 
-    @Column(nullable = true)
-    private Long minimumOrderAmount;
-
-    @Column(nullable = true)
-    private boolean notAvailableSpecific;
-
-    @Column(nullable = true)
-    private boolean atWeekend;
-    //
 
     @Builder
-    public Coupon(String name, CouponType couponType, DiscountType discountType,
-                  Long discountAmount, Float discountPercent,
-                  Long maximumDiscount, DiscountConditionDto discountConditionDto){
+    protected Coupon(String name, CouponType couponType, String couponDiscountConditionDBData,
+                     LocalDate publishedDate, LocalDate expiredDate,
+                     DiscountMethod discountMethod, DiscountProperty discountProperty){
         this.name = name;
         this.couponType = couponType;
-        this.discountType = discountType;
-        this.discountAmount = discountAmount;
-        this.discountPercent = discountPercent;
-        this.maximumDiscount = maximumDiscount;
-
-        this.atLeastFewDaysAgo = discountConditionDto.getAtLeastFewDaysAgo();
-        this.checkinPeriodStarted = discountConditionDto.getCheckinPeriodStarted();
-        this.checkinPeriodEnded = discountConditionDto.getCheckinPeriodEnded();
-        this.atLeastAccommodation = discountConditionDto.getAtLeastAccommodation();
-        this.notAvailableInfinityCouponRoom = discountConditionDto.isNotAvailableInfinityCouponRoom();;
-        this.minimumOrderAmount = discountConditionDto.getMinimumOrderAmount();
-        this.notAvailableSpecific = discountConditionDto.isNotAvailableSpecific();
-        this.atWeekend = discountConditionDto.isAtWeekend();
+        this.couponDiscountConditionDBData = couponDiscountConditionDBData;
+        this.publishedDate = publishedDate;
+        this.expiredDate = expiredDate;
+        this.discountMethod = discountMethod;
+        this.discountProperty = discountProperty;
     }
 
-    public boolean isAvailable(LocalDate checkinAt, LocalDate checkoutAt, Room room, Long price) {
-        //쿠폰타입이 맞는지확인. 일단 이렇게
-        if(this.couponType != CouponType.국내숙소){
-            return false;
+    public static class CouponPolicyBuilder{
+        private List<CouponConditionPolicy> policies;
+
+        public CouponPolicyBuilder(List<CouponConditionPolicy> couponConditionPolicies) {
+            this.policies = couponConditionPolicies;
         }
 
-        Period period = Period.between(LocalDate.now(), checkinAt);
-        if(period.getDays() < this.atLeastFewDaysAgo){
-            return false;
+        public CouponPolicyBuilder addPolicy(CouponConditionType couponConditionType, String[] objects){
+            this.policies.add(couponConditionType.create(objects));
+            return new CouponPolicyBuilder(this.policies);
         }
 
-        if (this.checkinPeriodStarted == null || this.checkinPeriodEnded == null) {
-            if (this.checkinPeriodStarted.isBefore(checkinAt) && this.checkinPeriodEnded.isAfter(checkinAt)) {
-                return false;
+        public String convertToDBData(){
+            CouponConditionConverter couponConditionConverter = new CouponConditionConverter();
+            String dbData = couponConditionConverter.convertToDatabaseColumn(policies);
+            return dbData;
+        }
+    }
+
+    public CouponValidTest isAvailable(CouponSelectVO couponSelectVO){
+        if(couponConditionPolicies == null) {
+            CouponConditionConverter couponConditionConverter =
+                    new CouponConditionConverter();
+
+            couponConditionPolicies =
+                    couponConditionConverter.convertToEntityAttribute(couponDiscountConditionDBData);
+        }
+
+        //할인 정책을 구분하는 기준은 프로퍼티 이니까 선정을 위임. (자신의 프로퍼티 타입이 맞는지 아닌지도 구분)
+        Optional<CouponValidTest> couponValidTest = discountProperty.isAvailable(couponSelectVO, couponConditionPolicies);
+
+        return couponValidTest.orElse(new CouponValidTest(true, null));
+    }
+
+    public void addCouponMiddleTable(CouponMiddleTable couponMiddleTable){
+        this.couponMiddleTables.add(couponMiddleTable);
+    }
+
+    //
+    public Price getAppliedCouponPrice(Price reservationPrice){
+        return null;
+    }
+
+    public List<String> showConditionsOfUse(){
+        List<String> conditions = new ArrayList<>();
+
+        if(couponConditionPolicies == null) {
+            CouponConditionConverter couponConditionConverter =
+                    new CouponConditionConverter();
+
+            couponConditionPolicies =
+                    couponConditionConverter.convertToEntityAttribute(couponDiscountConditionDBData);
+        }
+
+        for(CouponConditionPolicy couponConditionPolicy: couponConditionPolicies){
+            conditions.add(couponConditionPolicy.getCondition());
+        }
+        return conditions;
+    }
+
+    public static Coupon findMaximumDiscountCoupon(Consumer consumer, CouponUsable couponUsable,
+                                                   CouponSelectVO couponSelectVO){
+        List<Coupon> coupons = consumer.getCoupons();
+
+        //Converter
+        CouponPropertyTypeConverter cptc = new CouponPropertyTypeConverter();
+        String type = cptc.convert(couponUsable);
+
+        //Comparator
+        Comparator<Coupon> comparator = new Comparator<Coupon>() {
+            @Override
+            public int compare(Coupon c1, Coupon c2) {
+                if(c1.getAppliedCouponPrice(couponSelectVO.getPrice()) ==
+                        c2.getAppliedCouponPrice(couponSelectVO.getPrice()))
+                    return c1.getName().compareTo((c2.getName()));
+                else if (c1.getAppliedCouponPrice(couponSelectVO.getPrice())
+                        .compareTo(c2.getAppliedCouponPrice(couponSelectVO.getPrice())) > 0)
+                    return 1;
+                else
+                    return -1;
             }
-        }
+        };
 
-        Period period2 = Period.between(checkinAt, checkoutAt);
-        if (period2.getDays() < atLeastAccommodation) {
-            return false;
-        }
+        return coupons.stream()
+                .filter(coupon -> coupon.discountProperty.getClass().getName().equals(type))
+                .filter(coupon -> coupon.isAvailable(couponSelectVO).getIsAvailable())
+                .sorted(comparator)
+                .collect(Collectors.toList())
+                .get(0);
 
-        //주말을 포함하고 있으면 할인
-        if (this.atWeekend) {
-            DayOfWeek dayOfWeekCheckinAt = checkinAt.getDayOfWeek();
-            DayOfWeek dayOfWeekCheckoutAt = checkoutAt.getDayOfWeek();
-            int dayOfWeekNumCheckinAt = dayOfWeekCheckinAt.getValue();
-            int dayOfWeekNumCheckoutAt = dayOfWeekCheckoutAt.getValue();
-            if (dayOfWeekNumCheckinAt < 5 && dayOfWeekNumCheckoutAt < 5
-                    && Period.between(checkinAt, checkoutAt).getDays() >= 4) {
-                return false;
-            }
-        }
-
-        if (price < this.minimumOrderAmount) {
-            return false;
-        }
-
-//        if(!(room.isInfinityCouponRoom && isNotAvailableInfinityCouponRoom())){
-//            return false;
-//        }
-
-        return true;
     }
 
-    //Return Long type - Bad return type in lambda expression: Long cannot be converted to int.
-    public long getResultDiscountAmount(Long price){
-        if(this.discountType == DiscountType.AMOUNT){
-            return price - this.discountAmount;
-        }else if(this.discountType == DiscountType.PERCENT){
-            //최대 할인 금액 필요
-            Long result = new Long(Math.round(price * this.discountPercent / 10) * 10);
-            return result < maximumDiscount ? maximumDiscount : result;
-        }
-        return price;
+    public static Coupon publish(String name, CouponType couponType,
+                                 LocalDate publishedDate, LocalDate expiredDate,
+                                 DiscountMethod discountMethod, DiscountProperty discountProperty,
+                                 Long amount, String dbData){
+
+        Coupon coupon = Coupon.builder()
+                .name(name)
+                .couponType(couponType)
+                .publishedDate(publishedDate)
+                .expiredDate(expiredDate)
+                .discountMethod(discountMethod)
+                .discountProperty(discountProperty)
+                .couponDiscountConditionDBData(dbData)
+                .build();
+
+        return coupon;
     }
+
+    public static void use(CouponOwner couponOwner, Coupon coupon, Reservation reservation){
+        //쿠폰 가지고 있는지 확인
+        CouponMiddleTable couponMiddleTable = couponOwner.findCouponMiddleTableByCoupon(coupon);
+
+        //재고 확인
+        CouponStock couponStock = couponMiddleTable.getCouponStock();
+
+        //재고 줄이기
+        couponStock.reserved();
+
+        //discount coupon 객체 만들기 - reservation, discountedPrice, couponMiddleTable
+        Price price = coupon.getAppliedCouponPrice(reservation.);
+        CouponDiscount couponDiscount = CouponDiscount.create(reservation, price, couponMiddleTable);
+
+        reservation.addDiscount(couponDiscount);
+    }
+
+    public static void canceled(Reservation reservation){
+        //CouponOwner가 Consumer, Place, Leisure ...
+        Optional<Discount> discount =
+            reservation.getDiscounts().stream().filter(d -> d instanceof CouponDiscount).findAny();
+
+        //discount가 없는 경우는 충분히 일어날 수 있는 경우. 파라미터로 reservation이 아니라 discount를 가져와야 될 것 같다.
+        //discount.getConsumerMiddleTable을 가져온다.
+        if(!discount.isPresent()){
+            throw new BusinessException(ErrorCode.)
+        }
+
+        //discount를 가져왔으니까 이걸 취소시켜야 한다.
+        이벤트 주도 개발에 내용 좋아보이던데 그거 공부해 보기
+
+        //DiscountCoupon 객체에 관한건 reservation에서 해야 한다.
+        if(!){
+            discount 상태값 변경
+        }
+
+    }
+
+    public static void validate(){
+
+    }
+
 }
