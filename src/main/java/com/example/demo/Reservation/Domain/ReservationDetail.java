@@ -9,9 +9,11 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReservationDetail {
+public abstract class ReservationDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -19,13 +21,8 @@ public class ReservationDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservations_id")
     private Reservation reservation;
-    private LocalDate date;
-    private Long price;
 
-    @Builder
-    public ReservationDetail(Reservation reservation, LocalDate date, Long price) {
+    public ReservationDetail(Reservation reservation) {
         this.reservation = reservation;
-        this.date = date;
-        this.price = price;
     }
 }

@@ -8,14 +8,14 @@ import com.example.demo.Coupon.VO.CouponSelectVO;
 import com.example.demo.EtcDomain.PriceByDate;
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.Place.Repository.PlaceRepository;
-import com.example.demo.RatePlan.DTO.PoliciesResultDto;
+import com.example.demo.RatePlan.VO.PoliciesResultVO;
 import com.example.demo.RatePlan.Domain.RatePlan;
 import com.example.demo.RatePlan.Repository.RatePlanRepository;
 import com.example.demo.RemainingRoom.Service.RemainingRoomRegistry;
 import com.example.demo.RemainingRoom.Service.RemainingSugbakRoomService;
 import com.example.demo.Reservation.Domain.*;
-import com.example.demo.Reservation.Dto.NewReservationDto;
-import com.example.demo.Reservation.Dto.NewReservationRequestDto;
+import com.example.demo.Reservation.Dto.ReservationPageDto;
+import com.example.demo.Reservation.Dto.ReservationPageRequestDto;
 import com.example.demo.Reservation.Dto.ReservationCreateRequestDto;
 import com.example.demo.Reservation.Dto.ReservationSuccessDto;
 import com.example.demo.Reservation.Repository.ReservationRepository;
@@ -28,7 +28,6 @@ import com.example.demo.User.Domain.Consumer;
 import com.example.demo.User.Domain.User;
 import com.example.demo.User.Repository.UserRepository;
 import com.example.demo.User.Service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,32 +59,32 @@ public class SugbakReservationService implements ReservationService{
 
     @Override
     @Transactional
-    public NewReservationDto reservationPage(
-            NewReservationRequestDto newReservationRequestDto){
+    public ReservationPageDto reservationPage(
+            ReservationPageRequestDto reservationPageRequestDto){
         Consumer consumer = null;
         Coupon maximumDiscountCoupon = null;
 
-        Long placeId = newReservationRequestDto.getPlaceId();
-        Long roomId = newReservationRequestDto.getRoomId();
-        Long roomDetailId = newReservationRequestDto.getRoomDetailId();
-        Long consumerId = newReservationRequestDto.getConsumerId();
-        LocalDate checkinDate = LocalDate.parse(newReservationRequestDto.getCheckinAt());
-        LocalDate checkoutDate = LocalDate.parse(newReservationRequestDto.getCheckoutAt());
-        LocalTime checkinAt = LocalTime.parse(newReservationRequestDto.getCheckinAt());
-        LocalTime checkoutAt = LocalTime.parse(newReservationRequestDto.getCheckoutAt());
-        Long ratePlanId = newReservationRequestDto.getRatePlanId();
-        Long ratePlanVersion = newReservationRequestDto.getRatePlanVersion();
+        Long placeId = reservationPageRequestDto.getPlaceId();
+        Long roomId = reservationPageRequestDto.getRoomId();
+        Long roomDetailId = reservationPageRequestDto.getRoomDetailId();
+        Long consumerId = reservationPageRequestDto.getConsumerId();
+        LocalDate checkinDate = LocalDate.parse(reservationPageRequestDto.getCheckinAt());
+        LocalDate checkoutDate = LocalDate.parse(reservationPageRequestDto.getCheckoutAt());
+        LocalTime checkinAt = LocalTime.parse(reservationPageRequestDto.getCheckinAt());
+        LocalTime checkoutAt = LocalTime.parse(reservationPageRequestDto.getCheckoutAt());
+        Long ratePlanId = reservationPageRequestDto.getRatePlanId();
+        Long ratePlanVersion = reservationPageRequestDto.getRatePlanVersion();
 
         RoomDetail roomDetail = roomDetailRepository.findById(roomDetailId).orElseThrow(EntityNotFoundException::new);
 
         RatePlan ratePlan = ratePlanRepository.findById(ratePlanId).orElseThrow(EntityNotFoundException::new);
 
-        PoliciesResultDto policiesResultDto =
+        PoliciesResultVO policiesResultVO =
                 ratePlan.activatePlans(checkinDate, checkoutDate, roomDetail);
-        Long originalPrice = policiesResultDto.getOriginalPrice();
-        Long discountPrice = policiesResultDto.getDiscountPrice();
-        Long cancelFee = policiesResultDto.getCancelFee();
-        String cancelFeeValidInfo = policiesResultDto.getCancelFeeValidInfo();
+        Long originalPrice = policiesResultVO.getOriginalPrice();
+        Long discountPrice = policiesResultVO.getDiscountPrice();
+        Long cancelFee = policiesResultVO.getCancelFee();
+        String cancelFeeValidInfo = policiesResultVO.getCancelFeeValidInfo();
 
         if(consumerId != null){
             consumer = (Consumer) userRepository.findById(consumerId).orElseThrow(EntityNotFoundException::new);
@@ -102,7 +101,7 @@ public class SugbakReservationService implements ReservationService{
         Room room = roomDetail.getRoom();
         Place place = room.getPlace();
 
-        NewReservationDto newReservationDto = NewReservationDto.builder()
+        ReservationPageDto reservationPageDto = ReservationPageDto.builder()
                 .placeId(placeId)
                 .placeName(place.getName())
                 .roomId(roomId)
@@ -117,7 +116,7 @@ public class SugbakReservationService implements ReservationService{
                 .cancelFee(cancelFee)
                 .cancelFeeValidInfo(cancelFeeValidInfo)
                 .build();
-        return newReservationDto;
+        return reservationPageDto;
     }
 
 
@@ -153,7 +152,7 @@ public class SugbakReservationService implements ReservationService{
         RoomDetail roomDetail = roomDetailRepository.findById(roomDetailId).orElseThrow(EntityNotFoundException::new);
         Room room = roomDetail.getRoom();
 
-        SugbakReservation sugbakReservation = new SugbakReservation(guest, reservationCreateRequestDto.getContractorName(),
+        SugbakPlaceReservation sugbakReservation = new SugbakPlaceReservation(guest, reservationCreateRequestDto.getContractorName(),
                 reservationCreateRequestDto.getPhone(), room, roomDetail,
                 checkinDate, checkoutDate, reservationCreateRequestDto.getPersonNum());
 

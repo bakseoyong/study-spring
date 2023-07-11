@@ -1,35 +1,145 @@
 package com.example.demo.Reservation.Controller;
 
-import com.example.demo.Reservation.Dto.NewReservationDto;
-import com.example.demo.Reservation.Dto.NewReservationRequestDto;
-import com.example.demo.Reservation.Dto.ReservationCreateRequestDto;
-import com.example.demo.Reservation.Service.ReservationRegistry;
+import com.example.demo.Place.Domain.Place;
+import com.example.demo.Reservation.Dto.*;
+import com.example.demo.Reservation.Service.ReservationServiceImpl;
+import com.example.demo.utils.Exception.BusinessException;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.simple.JSONArray;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/reservation/*")
 public class ReservationController {
-    private ReservationRegistry reservationRegistry;
+    private ReservationServiceImpl reservationService;
 
     @GetMapping("/test")
     public String newReservationTest(){
         return "newReservation";
     }
 
+//    @PostMapping("/api/v1/leisure/new")
+//    public ResponseEntity<Object> loadLeisureReservationPage(
+//            @RequestBody String jsonArray){
+//
+//        Gson gson = new Gson();
+//        List<Map<String, Object>> leisureTickets =
+//                gson.fromJson(jsonArray, new TypeToken<List<Map<String, Object>>>(){}.getType());
+//
+//        if(leisureTickets.size() == 0){
+//            throw new BusinessException();
+//        }
+//
+//        final HttpHeaders headers = new HttpHeaders();
+//
+//        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance().path("/reservation/new");
+//        uriComponentsBuilder.queryParam("type", "leisure");
+//
+//        for (Map<String, Object> leisureTicket : leisureTickets){
+//            uriComponentsBuilder = uriComponentsBuilder
+//                    .queryParam("id", leisureTicket.get("id"))
+//                    .queryParam("quantity", leisureTicket.get("quantity"));
+//        }
+//
+//        headers.setLocation(uriComponentsBuilder.build().toUri());
+//
+//        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+//                .headers(headers)
+//                .build();
+//    }
+
+    @GetMapping("/new/leisure")
+    public ResponseEntity<Object> renderLeisure(String json){
+        Gson gson = new Gson();
+        Map<String, Object> attributes =
+                gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
+
+        //여기서 파싱을 하는 이유 : 요청된 데이터의 검증을 위해서
+        if(attributes.size() == 0){
+            throw new IllegalArgumentException();
+        }
+
+        ReservationPageDto reservationPageDto = reservationService.reservationPage2(attributes);
+
+
+        return ResponseEntity.ok()
+                .body(reservationPageDto);
+    }
+
+//    @PostMapping("/api/v1/place/new")
+//    public ResponseEntity<Object> loadPlaceReservationPage(
+//            @RequestBody PlaceReservationPageRequestDto placeReservationPageRequestDto){
+//        // ratePlanId는 서비스에서 가져와야 겠다.
+//        final HttpHeaders headers = new HttpHeaders();
+//
+//        headers.setLocation(UriComponentsBuilder.newInstance().path("/reservation/new")
+//                .queryParamIfPresent("lng", Optional.ofNullable(placeReservationPageRequestDto.getLng()))
+//                .queryParamIfPresent("lat", Optional.ofNullable(placeReservationPageRequestDto.getLat()))
+//                .queryParam("type", "place")
+//                .queryParam("id", placeReservationPageRequestDto.getId())
+//                .queryParam("roomDetailId", placeReservationPageRequestDto.getRatePlanId())
+//                .queryParam("ratePlanId", )
+//                .queryParam("checkinDateTIme", placeReservationPageRequestDto.getCheckinDateTime())
+//                .queryParam("checkoutDateTime", placeReservationPageRequestDto.getCheckoutDateTime())
+//                .queryParam("adult", placeReservationPageRequestDto.getAdult())
+//                .queryParamIfPresent("child", Optional.ofNullable(placeReservationPageRequestDto.getChild()))
+//                .build()
+//        );
+//
+//        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+//                .headers(headers)
+//                .build();
+//    }
+
+    /**
+     * render로 된거 하나로 합치기
+     */
+//    @GetMapping("/reservation/new?type=place")
+//    public ResponseEntity<Object> renderReservationPage(){
+//        Object mock = null;
+//
+//        return ResponseEntity.ok(mock);
+//    }
+//
+//    @GetMapping("/reservation/new?type=leisure")
+//    public ResponseEntity<Object> renderReservationPage(){
+//        Object mock = null;
+//
+//        return ResponseEntity.ok(mock);
+//    }
+
+//    @GetMapping("/reservation/new")
+//    public ResponseEntity<Object> renderReservationPage(){
+//
+//    }
+
+
     @GetMapping("/new")
     public String getNew(
             @RequestParam("type") String type,
-            NewReservationRequestDto newReservationRequestDto,
+            ReservationPageRequestDto reservationPageRequestDto,
             Model model
             ){
-        NewReservationDto newReservationDto =
-                reservationRegistry.getServiceBean(type).reservationPage(newReservationRequestDto);
+        ReservationPageDto reservationPageDto =
+                reservationService.reservationPage(reservationPageRequestDto);
 //        NewReservationDto newReservationDto = reservationServiceImpl.reservationPage(newReservationRequestDto);
-        model.addAttribute("newReservationDto", newReservationDto);
+        model.addAttribute("newReservationDto", reservationPageDto);
         return "newReservation";
     }
 
@@ -45,7 +155,7 @@ public class ReservationController {
     @PostMapping(value = "/api/v1/payment/success")
     public String roomSuccessfullyReserved(@RequestParam("type") String type,
                                            ReservationCreateRequestDto reservationSuccessDto){
-        reservationRegistry.getServiceBean(type).createReservation(reservationSuccessDto);
+        reservationService.createReservation(reservationSuccessDto);
         return "reservationSuccess";
     }
 
