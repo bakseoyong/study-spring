@@ -1,6 +1,5 @@
 package com.example.demo.User.Domain;
 
-import com.example.demo.Reservation.Domain.Reservation;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
 import java.util.Random;
 import java.util.UUID;
 
@@ -17,13 +15,14 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DiscriminatorValue("NonConsumer_Type")
-public class NonConsumer extends User{
+public class UnregisteredOrderer extends Consumer{
     @Builder
-    NonConsumer (String id, String password, String email){
-        super(id, password, email);
+    private UnregisteredOrderer(String id, String password, String email,
+                                Name name, Phone phone){
+        super(id, password, email, null, name, phone);
     }
 
-    public static NonConsumer toEntity(){
+    public static UnregisteredOrderer of(Name name, Phone phone){
         String id = UUID.randomUUID().toString();
 
         byte[] bytes = new byte[8];
@@ -32,7 +31,7 @@ public class NonConsumer extends User{
 
         String email = id.substring(0, 8) + "@yanolja.com";
 
-        return NonConsumer.builder()
+        return UnregisteredOrderer.builder()
                 .id(id)
                 .password(password)
                 .email(email)

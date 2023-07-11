@@ -2,12 +2,16 @@ package com.example.demo.User.Domain;
 
 
 import com.example.demo.Coupon.Domain.ConsumerCoupon;
+import com.example.demo.Coupon.Domain.CouponMiddleTable;
 import com.example.demo.Coupon.Domain.Coupon;
-import com.example.demo.Coupon.Domain.CouponGroups;
+import com.example.demo.Coupon.Domain.CouponOwner;
 import com.example.demo.Wishlist.Domain.ConsumerWishlist;
 import com.example.demo.Review.Domain.Review;
 import com.example.demo.Point.Domain.Point;
 import com.example.demo.Point.Domain.PointDetail;
+import com.example.demo.Wishlist.Domain.Wishlist;
+import com.example.demo.utils.Exception.BusinessException;
+import com.example.demo.utils.Exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,61 +19,26 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@DiscriminatorValue("Consumer_Type")
-public class Consumer extends User{
-    private String name;
-    private String phone;
+@DiscriminatorValue("Consumer") //DTYPE - 수정하지 않는게 좋다.
+public abstract class Consumer extends User{
+    private Name name;
+    private Phone phone;
     private String nickname;
 
-    @OneToMany(mappedBy = "consumer")
-    private List<Point> points = new ArrayList<>();
-
-    @OneToMany(mappedBy = "consumer")
-    private List<PointDetail> pointDetails = new ArrayList<>();
-
-    private Long availablePointAmount;
-
-    private Long after15DayExpiredPointAmount;
-
-    @OneToMany(mappedBy = "consumer")
-    private List<ConsumerCoupon> consumerCoupons = new ArrayList<>();
-
-    @OneToMany(mappedBy = "consumer")
-    private List<ConsumerWishlist> consumerWishlists = new ArrayList<>();
-
-    @OneToMany(mappedBy = "consumer")
-    private List<Review> reviews = new ArrayList<>();
-
     @Builder
-    Consumer(String id, String password, String email, String nickname, String name, String phone){
-        super(id, password, email);
+    Consumer(String loginId, String password, String email, String nickname, Name name, Phone phone){
+        super(loginId, password, email);
         this.nickname = nickname;
         this.name = name;
         this.phone = phone;
-        this.availablePointAmount = 0L;
-        this.after15DayExpiredPointAmount = 0L;
     }
-    public void setAvailablePointAmount(Long amount){
-        if (availablePointAmount + amount < 0) {
-            throw new IllegalArgumentException("Try to spend more points than you have");
-        }
-        availablePointAmount += amount;
-    }
-
-    public void setAfter15DayExpiredPointAmount(Long amount){
-        after15DayExpiredPointAmount += amount;
-    }
-
-    public List<Coupon> getCoupons(){
-        return this.getConsumerCoupons().stream()
-                .map(consumerCoupon -> consumerCoupon.getCoupon())
-                .collect(Collectors.toList());
-    }
-
 }

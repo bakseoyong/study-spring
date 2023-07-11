@@ -11,12 +11,13 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "DTYPE")
 @Getter
-@Table(name="Users")
+@Table(name="users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_id")
     private Long id;
 //    @GeneratedValue(generator = "uuid2")
 //    @GenericGenerator(name= "uuid2", strategy = "uuid2")
