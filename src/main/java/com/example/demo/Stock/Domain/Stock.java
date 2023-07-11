@@ -1,5 +1,6 @@
 package com.example.demo.Stock.Domain;
 
+import com.example.demo.utils.Exception.BusinessException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,7 @@ public abstract class Stock{
 
     public void update(Long num){
         Long selled = total - remain;
-        if(num - selled < 0){ //팔린 개수가 업데이트 되려는 개수보다 작다면
+        if(num - selled < 0){ //팔린 개수가 업데이트 되려는 개수보다 많다면
             throw new IllegalArgumentException();
         }
 
@@ -44,15 +45,24 @@ public abstract class Stock{
         }
     }
 
-    private void increase(Long num){
+    protected void increase(Long num){
         this.remain += (num - total);
         this.total = num;
     }
 
-    private void decrease(Long num){
+    protected void decrease(Long num){
         Long selled = total - remain;
         this.total = num;
         this.remain = num - selled;
     }
 
+    public void reserved(){
+        if(this.remain <= 0)
+            throw new BusinessException(ErrorCode.쿠폰_재고_부족);
+        this.remain -= 1;
+    }
+
+    public void cancel(){
+        this.remain += 1;
+    }
 }

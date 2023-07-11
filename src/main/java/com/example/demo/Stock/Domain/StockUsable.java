@@ -1,4 +1,4 @@
 package com.example.demo.Stock.Domain;
 
-public class LeisureStock {
+public interface StockUsable {
 }
