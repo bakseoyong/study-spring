@@ -1,21 +1,18 @@
 package com.example.demo.Room.Domain;
 
 import com.example.demo.Place.Domain.*;
-import com.example.demo.Reservation.Domain.Reservation;
 import com.example.demo.Review.Domain.Review;
+import com.example.demo.Review.Domain.ReviewScoreAndNum;
+import com.example.demo.utils.Price;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 //isInfinityCouponRoom -> 맞으면
 
@@ -29,116 +26,152 @@ public class Room {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "business_id")
+    @JoinColumn(name = "place_id")
     private Place place;
 
     @Column(nullable = false)
     private String name;
 
-    private RoomType roomType;
-
-    //비수기, 준성수기, 성수기 . 주중 금요일 토요일
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<BasePrice> basePrices;
-
-    private Long standardPrice;
-
-    private Long standardPersonNum;
-
-    private Long maximumPersonNum;
-
-    private boolean noSmoking;
+    //private RoomType roomType;
     private String information;
-    private LocalTime checkinAt;
-    private LocalTime checkoutAt;
-
-    private Long reviewTotalScore;
-
-    private Long reviewNum;
 
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<Reservation> reservations;
+    @OneToMany(mappedBy = "room", cascade = CascadeType.PERSIST)
+    private List<RoomDetail> roomDetails = new ArrayList<>();
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    private List<DiscountRoom> discountRooms;
+    @OneToMany(mappedBy = "room", cascade = CascadeType.PERSIST)
+    private List<Review> reviews = new ArrayList<>();
 
-    @Builder
-    public Room(Place place, String name, Long standardPrice, Long standardPersonNum, Long maximumPersonNum,
-                boolean noSmoking, String information, LocalTime checkinAt, LocalTime checkoutAt){
-        this.place = place;
-        this.name = name;
-        this.standardPrice = standardPrice;
-        this.standardPersonNum = standardPersonNum;
-        this.maximumPersonNum = maximumPersonNum;
-        this.noSmoking = noSmoking;
-        this.information = information;
-        this.checkinAt = checkinAt;
-        this.checkoutAt = checkoutAt;
-        this.reviewTotalScore = 0L;
-        this.reviewNum = 0L;
+    private Room(builder builder){
+        this.name = builder.name;
+        this.place = builder.place;
     }
 
-    private void setRoomNum(Long num){
-        if(reviewNum + num < 0)
-            throw new IllegalArgumentException("리뷰 개수는 0 미만이 될 수 없습니다.");
-        reviewNum += num;
-    }
+    public static class builder{
+        private String name;
+        private Place place;
 
-    private void setReviewTotalScore(Long score){
-        if(reviewTotalScore + score < 0)
-            throw new IllegalArgumentException("총 평점은 0 미만이 될 수 없습니다.");
-        reviewTotalScore += score;
-    }
-
-    public void createReview(Review review) {
-        setRoomNum(1L);
-        this.setReviewTotalScore(review.getScore());
-    }
-
-    public void deletedReview(Review review){
-        setRoomNum(-1L);
-        this.setReviewTotalScore(review.getScore());
-    }
-
-    public void addBasePrice(BasePrice basePrice){
-        this.basePrices.add(basePrice);
-    }
-
-    public void addDiscountRoom(DiscountRoom discountRoom){this.discountRooms.add(discountRoom);}
-
-    public BasePrice findBasePriceByPriceType(PriceType priceType){
-        BasePrice b = this.basePrices.stream()
-                .filter(basePrice -> basePrice.getPriceType() == priceType)
-                .findAny()
-                .orElseThrow(EntityNotFoundException::new);
-
-        return b;
-    }
-
-    public Long findOriginalPrice(PriceType priceType, DayOfWeek dayOfWeek){
-        BasePrice basePrice = findBasePriceByPriceType(priceType);
-
-        return basePrice.findPriceByDayOfWeek(dayOfWeek);
-    }
-
-    public Long getDiscountPrice(LocalDate localDate, Long originalPrice, DayOfWeek dayOfWeek){
-        List<Discount> discounts =
-                discountRooms.stream().map(discountRoom -> discountRoom.getDiscount()).collect(Collectors.toList());
-
-        //discount에게 책임을 부여 & discount는 중첩이 가능해서 가장 마지막에 적용된 할인을 적용해야 한다.
-        //or 할인도 중첩되지 않도록 구현 가능
-        Discount discount =
-                discounts.stream()
-                        .filter(d -> d.isIncludeDate(localDate))
-                        .reduce((first, second) -> second)
-                        .get();
-
-        //에러가 날 상황은 아니다.
-        if(discount == null){
-            return originalPrice;
+        public builder(){
         }
 
-        return discount.getPriceAppliedDiscount(originalPrice, dayOfWeek);
+        public Room.builder name(String name){
+            this.name = name;
+            return this;
+        }
+
+        public Room.builder place(Place place){
+            this.place = place;
+            return this;
+        }
+
+        public Room build(){
+            return new Room(this);
+        }
+    }
+//    @Builder
+//    public Room(Place place, String name, Long standardPersonNum, Long maximumPersonNum,
+//                Long weekdayPrice, Long fridayPrice, Long weekendPrice,
+//                String information){
+//        this.place = place;
+//        this.name = name;
+//        this.standardPersonNum = standardPersonNum;
+//        this.maximumPersonNum = maximumPersonNum;
+//        this.weekdayPrice = weekdayPrice;
+//        this.fridayPrice = fridayPrice;
+//        this.weekendPrice = weekendPrice;
+//        this.information = information;
+//    }
+
+    public void setPlace(Place place){
+        this.place = place;
+    }
+
+    public void addReview(Review review){
+        this.reviews.add(review);
+    }
+
+    public void addRoomDetail(RoomDetail roomDetail) { this.roomDetails.add(roomDetail); }
+
+    public void dismissReview(Review review){
+        this.reviews.remove(review);
+    }
+
+    @PreRemove
+    public void preRemove(){
+        place.dismissRoom(this);
+        this.place = null;
+    }
+
+    /**
+     * Place를 노출할 때 가장 가격이 싼 방의 가격을 노출시키기 위해 사용되는 메서드
+     */
+    public Price getMaximumDiscountPrice(LocalDate startDate, LocalDate endDate) {
+        //Room마다 RoomDetail은 최소 한개이상은 존재해야 한다.
+        //=> TempPrice값이 이래도 된다.
+        Price tempPrice = Price.of(99999999L);
+
+        for(RoomDetail roomDetail: roomDetails){
+            Price discountPrice = roomDetail.getMaximumDiscountPrice(startDate, endDate);
+            tempPrice = Price.min(discountPrice, tempPrice);
+        }
+
+        return tempPrice;
+    }
+
+    public ReviewScoreAndNum getReviewScoreAndNum(){
+        int size = reviews.size();
+        double score = 0;
+
+        for(Review review: reviews){
+            score += review.getOverall();
+        }
+
+        return new ReviewScoreAndNum(size, score);
+    }
+
+    public List<RoomPriceAndDiscount> getRoomPriceAndDiscounts(LocalDate startDate, LocalDate endDate){
+        List<RoomPriceAndDiscount> roomPriceAndDiscounts = new ArrayList<>();
+
+        for(RoomDetail roomDetail: roomDetails){
+            Price discountedPrice = roomDetail.getMaximumDiscountPrice(startDate, endDate);
+            Price originalPrice = roomDetail.showPrice(startDate, endDate);
+
+            //20만원이 5만원이 되면 75%할인인데 5/20 = 25 / 100이니까 25%할인인걸로 계산됨. => 원가에서 할인가를 빼 줘야 한다.
+            Long discount = Long.valueOf(Math.round(
+                    originalPrice.sub(discountedPrice).divide(originalPrice).getAmount()) * 100);
+
+            roomPriceAndDiscounts.add(new RoomPriceAndDiscount(discountedPrice, discount));
+        }
+
+        return roomPriceAndDiscounts;
+    }
+
+    public List<RoomPriceAndDiscountPerRoomDetailType>
+            getRoomPriceAndDiscountPerRoomDetailType(LocalDate startDate, LocalDate endDate){
+        List<RoomPriceAndDiscountPerRoomDetailType> roomPriceAndDiscountPerRoomDetailTypes
+                = new ArrayList<>();
+
+        for(RoomDetail roomDetail: roomDetails){
+
+            String classStr = roomDetail.getClass().toString();
+
+            String[] splits = classStr.split(".");
+            String type = splits[-1];
+
+
+            Price discountedPrice = roomDetail.getMaximumDiscountPrice(startDate, endDate);
+            Price originalPrice = roomDetail.showPrice(startDate, endDate);
+
+            //20만원이 5만원이 되면 75%할인인데 5/20 = 25 / 100이니까 25%할인인걸로 계산됨. => 원가에서 할인가를 빼 줘야 한다.
+            Long discount = Long.valueOf(Math.round(
+                    originalPrice.sub(discountedPrice).divide(originalPrice).getAmount()) * 100);
+
+
+
+            roomPriceAndDiscountPerRoomDetailTypes.add(
+                    new RoomPriceAndDiscountPerRoomDetailType(type, discountedPrice, discount));
+        }
+
+        return roomPriceAndDiscountPerRoomDetailTypes;
     }
 }
