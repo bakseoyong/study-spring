@@ -1,6 +1,7 @@
 package com.example.demo.RatePlan.Domain.PricePlans;
 
 import com.example.demo.EtcDomain.PriceByDate;
+import com.example.demo.utils.Price;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -23,18 +24,20 @@ public class GeneralPricePolicy implements PricePolicy{
         this.weekendPrice = weekendPrice;
     }
 
-    public Long calculate(LocalDate startDate, LocalDate endDate){
-        Long original = 0L;
+    public Price calculate(LocalDate startDate, LocalDate endDate){
+        Price original = Price.of(0L);
 
         for(LocalDate d=startDate; d.isBefore(endDate); d=d.plusDays(1)) {
             switch (d.getDayOfWeek()) {
                 case FRIDAY:
-                    original += friPrice;
+                    original = original.sum(Price.of(friPrice));
+                    break;
                 case SATURDAY:
                 case SUNDAY:
-                    original += weekendPrice;
+                    original = original.sum(Price.of(weekendPrice));
+                    break;
                 default:
-                    original += weekdayPrice;
+                    original = original.sum(Price.of(weekdayPrice));
             }
         }
 
@@ -42,17 +45,17 @@ public class GeneralPricePolicy implements PricePolicy{
     }
 
     public PriceByDate getPricePerDays(LocalDate startDate, LocalDate endDate){
-        Map<LocalDate, Long> map = new HashMap<>();
+        Map<LocalDate, Price> map = new HashMap<>();
 
         for(LocalDate d=startDate; d.isBefore(endDate); d=d.plusDays(1)) {
             switch (d.getDayOfWeek()) {
                 case FRIDAY:
-                    map.put(d, friPrice);
+                    map.put(d, Price.of(friPrice));
                 case SATURDAY:
                 case SUNDAY:
-                    map.put(d, weekendPrice);
+                    map.put(d, Price.of(weekendPrice));
                 default:
-                    map.put(d, weekdayPrice);
+                    map.put(d, Price.of(weekdayPrice));
             }
         }
 

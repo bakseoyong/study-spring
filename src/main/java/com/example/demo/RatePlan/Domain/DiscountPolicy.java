@@ -2,6 +2,7 @@ package com.example.demo.RatePlan.Domain;
 
 import com.example.demo.EtcDomain.PriceByDate;
 import com.example.demo.Place.Domain.Place;
+import com.example.demo.utils.Price;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -13,5 +14,5 @@ import javax.persistence.InheritanceType;
 //@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 //@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public interface DiscountPolicy extends Policy{
-    public Long calculate(PriceByDate priceByDate);
+    public Price calculate(PriceByDate priceByDate);
 }

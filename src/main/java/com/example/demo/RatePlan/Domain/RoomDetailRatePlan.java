@@ -13,46 +13,15 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-@Table(name = "room_rate_plans")
+@DiscriminatorValue(value = "RoomDetail")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-public class RoomDetailRatePlan {
-    @Id
-    @Column(name = "room_rate_plan_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
+public class RoomDetailRatePlan extends RatePlanMiddleTable{
     @ManyToOne
     @JoinColumn(name = "room_detail_id")
     private RoomDetail roomDetail;
 
-    @ManyToOne
-    @JoinColumn(name = "rate_plan_id")
-    private RatePlan ratePlan;
-
-    @Column
-    private LocalDate startDate;
-
-    @Column
-    private LocalDate endDate;
-
     @Builder
-    public RoomDetailRatePlan(RoomDetail roomDetail, RatePlan ratePlan, LocalDate startDate, LocalDate endDate) {
+    public RoomDetailRatePlan(RoomDetail roomDetail) {
         this.roomDetail = roomDetail;
-        this.ratePlan = ratePlan;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
-    public Boolean validateDate(LocalDate inputDate){
-        if(ChronoUnit.DAYS.between(inputDate, startDate) >= 0 &&
-            ChronoUnit.DAYS.between(endDate, inputDate) >= 0){
-            return true;
-        }
-        return false;
-    }
-
-    public Long getDiscountPrice(PriceByDate priceByDate){
-        return ratePlan.getDiscountPrice(priceByDate);
     }
 }

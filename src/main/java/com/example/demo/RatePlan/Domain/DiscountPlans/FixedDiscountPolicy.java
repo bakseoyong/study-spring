@@ -3,6 +3,7 @@ package com.example.demo.RatePlan.Domain.DiscountPlans;
 import com.example.demo.EtcDomain.PriceByDate;
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.RatePlan.Domain.DiscountPolicy;
+import com.example.demo.utils.Price;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -19,21 +20,21 @@ public class FixedDiscountPolicy implements DiscountPolicy {
     }
 
     @Override
-    public Long calculate(PriceByDate priceByDate){
-        Long discounted = 0L;
+    public Price calculate(PriceByDate priceByDate){
+        Price discounted = Price.of(0L);
 
-        for (Map.Entry<LocalDate, Long> entry : priceByDate.getPriceByDates().entrySet()) {
+        for (Map.Entry<LocalDate, Price> entry : priceByDate.getPriceByDates().entrySet()) {
             LocalDate date = entry.getKey();
-            Long original = entry.getValue();
+            Price original = entry.getValue();
 
             switch (date.getDayOfWeek()) {
                 case FRIDAY:
-                    discounted += original - fridayFixed;
+                    discounted = original.sum(Price.of(fridayFixed));
                 case SATURDAY:
                 case SUNDAY:
-                    discounted += original - weekendFixed;
+                    discounted = original.sum(Price.of(weekendFixed));
                 default:
-                    discounted += original - weekdayFixed;
+                    discounted = original.sum(Price.of(weekdayFixed));
             }
 
         }

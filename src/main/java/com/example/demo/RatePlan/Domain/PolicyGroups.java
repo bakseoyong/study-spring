@@ -4,6 +4,7 @@ import com.example.demo.EtcDomain.PriceByDate;
 import com.example.demo.Place.Domain.Place;
 import com.example.demo.RatePlan.Domain.PricePlans.NonePricePolicy;
 import com.example.demo.RatePlan.Domain.PricePlans.PricePolicy;
+import com.example.demo.utils.Price;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
@@ -32,7 +33,7 @@ public class PolicyGroups {
         this.policies = policies;
     }
 
-    public Long showPrice(LocalDate startDate, LocalDate endDate){
+    public Price showPrice(LocalDate startDate, LocalDate endDate){
         PricePolicy pricePolicy;
         try {
             pricePolicy = (PricePolicy) policies.stream()
@@ -63,7 +64,7 @@ public class PolicyGroups {
         return pricePolicy.getPricePerDays(startDate, endDate);
     }
 
-    public Long showCancelFee(PriceByDate priceByDate){
+    public Price showCancelFee(PriceByDate priceByDate){
         CancelFeePolicy cancelFeePolicy;
         try {
             cancelFeePolicy = (CancelFeePolicy) policies.stream()
@@ -77,7 +78,7 @@ public class PolicyGroups {
         return cancelFeePolicy.calculate(priceByDate);
     }
 
-    public Long showDiscountPrice(PriceByDate priceByDate){
+    public Price showDiscountPrice(PriceByDate priceByDate){
         DiscountPolicy discountPolicy;
 
         try {
